@@ -1,0 +1,69 @@
+.sidebar {
+  width: 16rem; /* 256px */
+  min-height: 100vh;
+  background-color: #1e3a8a;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.sidebar li span {
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+/* Icon size */
+.sidebar li svg {
+  font-size: 1.1rem;
+}
+
+/* Hover effect */
+.sidebar li:hover {
+  background-color: #1d4ed8;
+  transform: translateX(4px);
+}
+
+/* Active page (optional - if you want to highlight current page manually) */
+.sidebar li.active {
+  background-color: #2563eb;
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 0 #ffffff;
+}
+
+/* Logout link styles */
+.sidebar li.logout {
+  color: #f87171;
+  margin-top: 1.5rem;
+}
+
+.sidebar li.logout:hover {
+  background-color: #b91c1c;
+  transform: translateX(4px);
+  color: #ffffff;
+}

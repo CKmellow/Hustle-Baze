@@ -1,0 +1,10 @@
+.student-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.student-main {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: #f1f5f9;
+}
