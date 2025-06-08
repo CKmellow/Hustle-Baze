@@ -12,8 +12,8 @@ const StudentSidebar = ({ setActivePage }) => {
     };
   const links = [
     { key: 'dashboard', label: 'Dashboard', icon: <FaHome /> },
-    { key: 'applications', label: 'My Applications', icon: <FaClipboardList /> },
-    { key: 'internships', label: 'Internships', icon: <FaBriefcase /> },
+    { key: 'Applications', label: 'My Applications', icon: <FaClipboardList /> },
+    { key: 'Internships', label: 'Internships', icon: <FaBriefcase /> },
     { key: 'reports', label: 'Progress Reports', icon: <FaFileAlt /> },
     { key: 'messages', label: 'Messages', icon: <FaEnvelope /> },
     { key: 'resources', label: 'Resources', icon: <FaBook /> },

@@ -3,6 +3,8 @@ import StudentSidebar from './StudentSidebar';
 import StudentDash from './StudentDash';
 import './StudentLayout.css';
 import Topbar from './Topbar';
+import Applications from './Applications';
+import Internships from './Internships';
 
 const StudentLayout = () => {
   const [activePage, setActivePage] = useState("dashboard");
@@ -11,8 +13,10 @@ const StudentLayout = () => {
     switch (activePage) {
       case "dashboard":
         return <StudentDash />;
-      case "internships":
-        return <div>Internships Page</div>;
+      case "Applications":
+        return <Applications />;
+      case "Internships":
+        return <Internships/> ;
       case "reports":
         return <div>Progress Reports Page</div>;
       case "messages":
