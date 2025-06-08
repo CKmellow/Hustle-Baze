@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './StudentDash.css';
-import { useAuth } from '../context/AuthContext'; // Assuming you have an auth context
 
 const StudentDash = () => {
-  const { currentUser } = useAuth(); // Get current user from auth context
+  // Get user data from localStorage
+  const user = JSON.parse(localStorage.getItem('user'));
+  const studentID = user?._id;
+
   const [dashboardData, setDashboardData] = useState({
     profileCompletion: 0,
     applicationCounts: {
@@ -18,14 +20,22 @@ const StudentDash = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!currentUser?.studentID) return;
+    if (!studentID) {
+      setError("No student ID found. Please log in again.");
+      setLoading(false);
+      return;
+    }
 
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://localhost:5000/api/student/${currentUser.studentID}/application-status-counts`,
-          { withCredentials: true } // Include cookies if using session auth
+          `http://localhost:5000/api/student/${studentID}/application-status-counts`,
+          { 
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
         );
         
         setDashboardData({
@@ -47,7 +57,7 @@ const StudentDash = () => {
     };
 
     fetchDashboardData();
-  }, [currentUser]);
+  }, [studentID]);
 
   if (loading) {
     return (
@@ -62,14 +72,22 @@ const StudentDash = () => {
     return (
       <div className="error-container">
         <p className="error-message">{error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
+        <button 
+          onClick={() => window.location.reload()}
+          className="retry-button"
+        >
+          Retry
+        </button>
       </div>
     );
   }
 
   return (
     <div className="student-dashboard-container">
-      <h2>Student Dashboard</h2>
+      <div className="welcome-header">
+        <h2>Welcome, {user?.fname} {user?.lname}</h2>
+        <p className="student-id">Student ID: {studentID}</p>
+      </div>
 
       <div className="dashboard-card profile-card">
         <h3>Profile Completeness</h3>
@@ -84,32 +102,48 @@ const StudentDash = () => {
         <p className="profile-completion-text">
           {dashboardData.profileCompletion}% complete
         </p>
+        <button className="update-profile-btn">
+          Update Profile
+        </button>
       </div>
 
       <div className="dashboard-grid">
         <div className="dashboard-card tile pending">
           <h4 className="card-title">Pending Applications</h4>
           <p className="card-stat">{dashboardData.applicationCounts.pending}</p>
+          <p className="card-subtext">Applications under review</p>
         </div>
         <div className="dashboard-card tile accepted">
           <h4 className="card-title">Accepted Applications</h4>
           <p className="card-stat">{dashboardData.applicationCounts.accepted}</p>
+          <p className="card-subtext">Successful applications</p>
         </div>
         <div className="dashboard-card tile rejected">
           <h4 className="card-title">Rejected Applications</h4>
           <p className="card-stat">{dashboardData.applicationCounts.rejected}</p>
+          <p className="card-subtext">Unsuccessful applications</p>
         </div>
       </div>
 
       <div className="dashboard-card alerts-card">
-        <h3 className="card-title">Alerts</h3>
+        <div className="alerts-header">
+          <h3 className="card-title">Alerts</h3>
+          <span className="alerts-badge">
+            {dashboardData.alerts.length}
+          </span>
+        </div>
         <ul className="card-alerts">
           {dashboardData.alerts.length > 0 ? (
             dashboardData.alerts.map((alert, index) => (
-              <li key={index} className="alert-item">{alert}</li>
+              <li key={index} className="alert-item">
+                <span className="alert-icon">!</span>
+                {alert}
+              </li>
             ))
           ) : (
-            <li className="alert-item">No new alerts</li>
+            <li className="alert-item no-alerts">
+              No new alerts
+            </li>
           )}
         </ul>
       </div>
