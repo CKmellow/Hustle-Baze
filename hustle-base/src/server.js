@@ -26,7 +26,7 @@ async function connectToDb() {
     try {
         await client.connect();
         console.log('Connected to MongoDB');
-        return client.db("qrcodeAttendance");
+        return client.db("Hustle-db");
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
         throw new Error('Failed to connect to the database');
@@ -124,7 +124,6 @@ catch(error){
 }
 });
 
-// GET application status counts for a student
 app.get('/api/student/:studentID/application-status-counts', async (req, res) => {
   const studentID = req.params.studentID.trim();
   console.log("Fetching counts for studentID:", studentID);
