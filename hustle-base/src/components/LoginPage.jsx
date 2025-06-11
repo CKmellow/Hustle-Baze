@@ -139,7 +139,7 @@ const LoginPage = () => {
             required
           />
           
-          <button type="submit">Login</button>
+          <button type="submit"><span>Login</span></button>
         </form>
       ) : (
         <form onSubmit={handleSignup}>
@@ -164,6 +164,7 @@ const LoginPage = () => {
             placeholder="Enter ID"
             required
           />
+          
           <input
             type="email"
             value={signupData.email}
@@ -185,10 +186,10 @@ const LoginPage = () => {
           >
             <option value="">Select Role</option>
             <option value="student">Student</option>
-            <option value="admin">Admin</option>
-            <option value="staff">Staff</option>
+            <option value="employer">Employer</option>
+            <option value="careersOffice">Career's office</option>
           </select>
-          <button type="submit">Signup</button>
+         <button type="submit"><span>SignUp</span></button>
         </form>
       )}
       {errorMessage && <p className="error-message">{errorMessage}</p>}

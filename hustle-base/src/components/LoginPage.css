@@ -1,3 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Matemasie&family=Sofadi+One&display=swap');
+*{
+    letter-spacing: 0.5px;
+    word-spacing: normal;
+     font-family: "Sofadi One", system-ui;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+   
+  }
+  :root {
+    --color-1: #F72585;
+    --color-2: #B5179E;
+    --color-3: #7209B7;
+    --color-4: #560BAD;
+    --color-5: #3A0CA3;
+    --color-6: #4361EE;
+    --color-7: #4895EF;
+    --color-8: #4CC9F0;
+  }
+  html{
+    font-size: 70%;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    scroll-padding-top: 7rem;
+    
+    
+  }
+
+.sofadi-one-regular {
+  font-family: "Sofadi One", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+.marcellus-regular {
+  font-family: "Marcellus", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 /* Container for the entire login form */
 .login-container {
     display: flex;
@@ -11,9 +51,17 @@
   
   /* Header styling */
   .login-container h2 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: bold;
-    color: #BFA46A; /* Teal color for the header */
+
+    background: -webkit-linear-gradient(to right,#F72585 , #4895EF);  
+    background: linear-gradient(to right, #F72585, #4895EF); 
+    background-size: 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-decoration: none;
+     /* Teal color for the header */
     margin-bottom: 1rem;
   }
   
@@ -27,7 +75,7 @@
     background-color: #fff;
     border-radius: 8px;
     padding: 2rem;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
     margin-top: 20px;
   }
   
@@ -38,7 +86,7 @@
     margin-bottom: 1rem;
     border: 1px solid #e0e0e0;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.7rem;
     background-color: #f4f9ff;
   }
   
@@ -46,23 +94,54 @@
   button[type="submit"] {
     width: 100%;
     padding: 0.75rem;
-    background-color: #BFA46A; /* Yellow-orange button */
+    background-color: var(--color-6); 
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.6rem;
+    position: relative; 
+    transition: color 0.35s ease-in; 
     margin-bottom: 1rem;
-  }
+}
+
+button[type="submit"]:hover {
+    color: #fff; 
+}
+
+button[type="submit"]:hover:after {
+    width: 100%; 
+}
+
+button[type="submit"]:after {
+    position: absolute;
+    content: "";
+    top: 0;
+    left: 0;
+    width: 0; /* Initial width */
+    height: 100%;
+    background: var(--color-7); 
+    transition: width 0.35s ease-in; 
+    border-radius: 6px; 
+    z-index: 1; 
+}
+
+button[type="submit"] span {
+    position: relative;
+    color: white; 
+    z-index: 2; /* Ensure text is above the background */
   
-  button[type="submit"]:hover {
-    background-color: #885f12; /* Darker shade on hover */
-  }
-  
+    text-decoration: none;
+    transition: color 0.35s ease-in; /* Smooth transition for text color */
+}
+
+button[type="submit"]:hover span {
+    color: #fff; /* Maintain text color on hover */
+}
   /* Error message styling */
   .error-message {
-    color: red;
-    font-size: 0.9rem;
+    color: #ff4d4d; /* Red color for error messages */
+    font-size: 1.2rem;
     margin-top: 1rem;
   }
   
@@ -72,6 +151,7 @@
     justify-content: center;
     margin-bottom: 1rem;
     border-bottom: 1px solid #ccc;
+    transform: all 0.3s ease;
   }
   
   .tab {
@@ -79,13 +159,34 @@
     cursor: pointer;
     font-weight: bold;
     color: #333;
+    font-size: medium;
+    position: relative;
+    z-index: 1; /* Ensure tabs are above the background */
     transition: border-bottom 0.3s ease, color 0.3s ease;
   }
   
   .tab.active {
-    color: #BFA46A;
-    border-bottom: 2px solid #BFA46A;
+    font-size: large;
+    color: var(--color-2);
+  
+    transition: all 0.3s ease;
+    overflow: hidden;
   }
+ .tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 100%; /* start from outside the right */
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-2);
+  transition: left 0.3s ease;
+}
+
+.tab.active::after {
+  left: 0; /* slide in to the left */
+  overflow: hidden;
+}
   
   /* Styling for the dropdown (role select) */
   select {
@@ -94,7 +195,7 @@
     margin-bottom: 1rem;
     border: 1px solid #e0e0e0;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.4rem;
     background-color: #f4f9ff;
     color: #333; /* Text color */
     appearance: none; /* Remove default dropdown arrow for consistency across browsers */
@@ -109,7 +210,7 @@
   /* Dropdown hover and focus states */
   select:focus,
   select:hover {
-    border-color: #BFA46A;
+    border-color: var(--color-6);
     outline: none;
   }
   
@@ -125,9 +226,10 @@
     margin-bottom: 1rem;
     border: 1px solid #e0e0e0;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.4rem;
     background-color: #f4f9ff;
   }
+  
   
   
   
