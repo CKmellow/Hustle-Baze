@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaBell, FaCommentDots, FaUserCircle } from 'react-icons/fa';
 import './Topbar.css';
 
 const Topbar = () => {
+const [fname, setFname] = useState('');
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.fname) {
+      setFname(user.fname);
+    }
+  }, []);
+
   return (
     <header className="topbar">
       <div className="logo">InternPortal</div>
@@ -20,7 +29,7 @@ const Topbar = () => {
         </button>
         <div className="profile-dropdown" tabIndex={0} aria-label="User Profile">
           <FaUserCircle className="profile-icon" />
-          <span className="username">John ▼</span>
+          <span className="username">{fname} ▼</span>
         </div>
       </div>
     </header>
