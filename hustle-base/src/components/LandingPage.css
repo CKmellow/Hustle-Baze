@@ -1,0 +1,70 @@
+ .box{
+    min-height: 108vh;
+    align-items: center;
+    justify-content: center;
+    background-size: cover !important;
+    background-position: center !important;
+    width: 100%;
+    margin: 0;
+    background: #1c92d2; 
+  background: -webkit-linear-gradient(to right, #f2fcfe, #1c92d2); 
+  background: linear-gradient(to right, #f2fcfe, #1c92d2);
+    
+  }
+  .hero-heading{
+    font-size: 5vw;
+    padding-top: 250px;
+    color: black;
+    text-align: center;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .hero-description{
+    text-align: center;
+    color: rgb(238, 223, 196);
+    font-family: "Dancing Script", cursive;
+    font-weight: bolder;
+    font-size: 4vw;
+  }
+  .main-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 35px;
+    
+}
+.main-button a{
+    color: black;
+    text-decoration: none;
+}
+  .main-button button{
+    
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    padding: 14px 36px;
+    text-align: center;
+    display: inline-block;
+    font-size: 3rem;
+    background: #70e1f5; 
+    background: -webkit-linear-gradient(to right, #ffd194, #70e1f5);  
+    background: linear-gradient(to right, #ffd194, #70e1f5);  
+    font-weight: bold;
+    z-index: 2;
+    position: relative;
+    outline: none;
+    border: none;
+  }
+  .main-button button:hover{
+    background: var(--color-4);   
+    transform: scale(1.05);
+  }
+  .mainTitle{
+    text-align: center;
+    font-family: "Marcellus", serif;
+    font-weight: bolder;
+    font-size: 3vw;
+    color: #70e1f5;
+    padding-top: 50px;
+  }
