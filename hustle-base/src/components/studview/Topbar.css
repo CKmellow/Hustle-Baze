@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%);
+  background: var(--color-6);
   padding: 1rem 2.5rem;
   color: white;
   font-family: 'Poppins', sans-serif;
@@ -10,10 +10,10 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom-left-radius: 16px;
+  border-bottom-left-radius: 0px;
   border-bottom-right-radius: 16px;
   user-select: none;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .topbar:hover {
