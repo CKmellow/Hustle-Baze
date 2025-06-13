@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 import { toast } from 'sonner';
+import NavBar from './NavBar';
 
 const LoginPage = () => {
-   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
-  const [signupData, setSignupData] = useState({
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [errorMessage, setErrorMessage] = useState('');
+const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
+const [signupData, setSignupData] = useState({
     fname: '',
     lname: '',
     _id: '',
@@ -104,6 +105,7 @@ const LoginPage = () => {
   };
 
   return (
+     
     <div className="login-container">
       {/* Tabs for toggling between Login and Signup */}
       <div className="tabs">
@@ -194,6 +196,7 @@ const LoginPage = () => {
       )}
       {errorMessage && <p className="error-message">{errorMessage}</p>}
     </div>
+ 
   );
 };
 
