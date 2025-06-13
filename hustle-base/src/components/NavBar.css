@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Matemasie&family=Sofadi+One&display=swap');
+*{
+    letter-spacing: 0.5px;
+    word-spacing: normal;
+     font-family: "Sofadi One", system-ui;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+   
+  }
+  :root {
+    --color-1: #F72585;
+    --color-2: #B5179E;
+    --color-3: #7209B7;
+    --color-4: #560BAD;
+    --color-5: #3A0CA3;
+    --color-6: #4361EE;
+    --color-7: #4895EF;
+    --color-8: #4CC9F0;
+  }
+  html{
+    font-size: 70%;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    scroll-padding-top: 7rem;
+  }
+
+.sofadi-one-regular {
+  font-family: "Sofadi One", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+.marcellus-regular {
+  font-family: "Marcellus", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.navbar{
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: rgba(255, 255, 255, .1);
+  box-shadow: 0rem .1rem .5rem rgba(0,0,0, .1);
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 2%;
+  z-index: 1000;
+}
+.active, .navbar:hover{
+  padding: 2rem 9%;
+  background: rgba(0,0,0,.6);
+}
+.navbar-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1300px;
+    padding: 0 50px;
+}
+.navbar-menu{
+  display: flex;
+  list-style: none;
+  align-items: center;
+}
+#navbar-logo{
+  background: var(--color-1);  
+  background: -webkit-linear-gradient(to bottom, var(--color-1), var(--color-7));  
+  background: linear-gradient(to bottom, var(--color-1), var(--color-7)); 
+  background-size: 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 2.2rem;
+  font-weight: bold;
+  text-decoration: none;
+  align-items: center;
+  display: flex;
+  cursor: pointer;
+  font-size: 50px;
+}
+#navbar-logo span{
+  background-color: var(--color-7);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-family: "Dancing Script", cursive;
+  font-weight: bolder;
+  font-size: 50px;
+}
+.navbar-links{
+  font-weight: 1.5rem;
+  font-size: large;
+  text-decoration: underline;
+  color: wheat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 125px;
+  height: 100%;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.navbar-links:hover{
+  color:aliceblue ;
+ font-size: 2rem;
+  transition: all 0.3s ease;
+}
+.navbar-links:active{
+  color: var(--color-4);
+}
+.navbar-button{
+  padding: 00 1rem;
+  width: 100%;
+}
+.navbar-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  
+  .navbar-toggle .bar {
+    height: 3px;
+    width: 25px;
+    background-color: #fff;
+    margin: 4px 0;
+    transition: all 0.3s ease;
+  }
+.button{
+  padding: 10px 20px;
+  height: 100%;
+  width: 100%;
+  border-radius: 5px;
+  background: var(--color-1);  
+  background: -webkit-linear-gradient(to right, var(--color-6), var(--color-8));  
+  background: linear-gradient(to right, var(--color-6), var(--color-8));  
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: black;
+  transition: all 0.3s ease;
+}
