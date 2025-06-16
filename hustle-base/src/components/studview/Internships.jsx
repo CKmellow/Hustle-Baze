@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Internships.css';
 
-const Internships = () => {
+const Internships = ({setActivePage}) => {
   const [internships, setInternships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,9 +36,19 @@ const Internships = () => {
     fetchInternships();
   }, [filters]);
 
-  const handleApply = (internshipId) => {
-    navigate(`/apply/${internshipId}`);
+   const handleApplyNow = (internship) => {
+    // Save internship to localStorage before navigating
+    localStorage.setItem('currentApplication', JSON.stringify({
+      internshipId: internship._id,
+      internshipDetails: internship,
+      mode: 'apply'
+    }));
+    setActivePage('ApplicationForm');
   };
+
+  // const handleApply = (internshipId) => {
+  //   navigate(`/apply/${internshipId}`);
+  // };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -147,7 +157,7 @@ const Internships = () => {
               </div>
               <div className="card-footer">
                 <button
-                  onClick={() => handleApply(internship._id)}
+                  onClick={() => handleApplyNow(internship)}
                   className="apply-btn"
                   disabled={new Date(internship.deadline) < new Date()}
                 >

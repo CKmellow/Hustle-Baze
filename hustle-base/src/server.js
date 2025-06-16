@@ -352,6 +352,69 @@ app.get('/api/internships', async (req, res) => {
   }
 });
 
+// File upload endpoint
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    res.json({ filePath: req.file.path });
+  } catch (err) {
+    console.error("Error uploading file:", err);
+    res.status(500).json({ message: "File upload failed" });
+  }
+});
+
+// Create new application
+app.post('/api/applications', authMiddleware, async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const applicationsCollection = db.collection("Applications");
+    
+    // Verify the internship exists
+    const internshipsCollection = db.collection("Internships");
+    const internship = await internshipsCollection.findOne({ 
+      _id: new ObjectId(req.body.internship) 
+    });
+    
+    if (!internship) {
+      return res.status(404).json({ message: 'Internship not found' });
+    }
+    
+    const application = {
+      internshipID: req.body.internship,
+      studentID: req.user._id,
+      status: req.body.status || 'pending',
+      feedback: req.body.feedback || 'N/A',
+      coverLetter: req.body.coverLetter,
+      cv: req.body.cv,
+      applicationDate: new Date(req.body.applicationDate || Date.now()),
+      createdAt: new Date()
+    };
+    
+    const result = await applicationsCollection.insertOne(application);
+    
+    res.status(201).json({
+      message: 'Application submitted successfully',
+      applicationId: result.insertedId
+    });
+  } catch (err) {
+    console.error("Error creating application:", err);
+    res.status(500).json({ message: "Failed to submit application" });
+  }
+});
+
+// // Get ALL internships (no filters)
+// app.get('/api/internships', async (req, res) => {
+//   try {
+//     const db = await connectToDb();
+//     const internships = await db.collection('Internships').find({}).toArray();
+//     res.json(internships);
+//   } catch (err) {
+//     console.error('Error fetching internships:', err);
+//     res.status(500).json({ message: 'Server error. Failed to fetch internships.' });
+//   }
+// });
 
 // Start the server
 app.listen(port, () => {

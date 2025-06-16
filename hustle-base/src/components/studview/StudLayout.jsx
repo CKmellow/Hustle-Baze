@@ -5,6 +5,7 @@ import './StudentLayout.css';
 import Topbar from './Topbar';
 import Applications from './Applications';
 import Internships from './Internships';
+import ApplicationForm from './ApplicationForm';
 
 const StudentLayout = () => {
   const [activePage, setActivePage] = useState("dashboard");
@@ -14,9 +15,11 @@ const StudentLayout = () => {
       case "dashboard":
         return <StudentDash />;
       case "Applications":
-        return <Applications />;
+        return <Applications setActivePage={setActivePage} />;
       case "Internships":
-        return <Internships/> ;
+        return <Internships setActivePage={setActivePage}/> ;
+      case "ApplicationForm":
+        return <ApplicationForm setActivePage={setActivePage} />;
       case "reports":
         return <div>Progress Reports Page</div>;
       case "messages":
