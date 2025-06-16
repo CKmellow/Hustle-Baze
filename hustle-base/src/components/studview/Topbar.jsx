@@ -14,7 +14,7 @@ const [fname, setFname] = useState('');
 
   return (
     <header className="topbar">
-      <div className="logo">Student Portal</div>
+      <div className="logo">Hustle Base</div>
 
       {/* Search bar removed */}
 

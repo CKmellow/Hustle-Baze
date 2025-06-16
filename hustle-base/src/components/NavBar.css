@@ -40,7 +40,7 @@
   top: 0;
   right: 0;
   left: 0;
-  background: rgba(255, 255, 255, .1);
+  background: #ADD8E6;
   box-shadow: 0rem .1rem .5rem rgba(0,0,0, .1);
   height: 120px;
   display: flex;
@@ -50,7 +50,7 @@
 }
 .active, .navbar:hover{
   padding: 2rem 9%;
-  background: rgba(0,0,0,.6);
+  /* background: rgba(0,0,0,.6); */
 }
 .navbar-container{
     display: flex;
@@ -82,19 +82,19 @@
   font-size: 50px;
 }
 #navbar-logo span{
-  background-color: var(--color-7);
+  background-color: var(--color-2);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   font-family: "Dancing Script", cursive;
   font-weight: bolder;
-  font-size: 50px;
+  font-size: 40px;
 }
 .navbar-links{
   font-weight: 1.5rem;
   font-size: large;
   text-decoration: underline;
-  color: wheat;
+  color: var(--color-1);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -135,8 +135,8 @@
   width: 100%;
   border-radius: 5px;
   background: var(--color-1);  
-  background: -webkit-linear-gradient(to right, var(--color-6), var(--color-8));  
-  background: linear-gradient(to right, var(--color-6), var(--color-8));  
+  background: -webkit-linear-gradient(to right, var(--color-1), var(--color-2));  
+  background: linear-gradient(to right, var(--color-1), var(--color-2));  
   font-size: 1.8rem;
   font-weight: bold;
   text-decoration: none;

@@ -1,4 +1,13 @@
- .box{
+ :root {
+    --color-1: #F72585;
+    --color-2: #B5179E;
+    --color-3: #7209B7;
+    --color-4: #560BAD;
+    --color-5: #3A0CA3;
+    --color-6: #4361EE;
+    --color-7: #4895EF;
+    --color-8: #4CC9F0;
+  }.box{
     min-height: 108vh;
     align-items: center;
     justify-content: center;
@@ -6,33 +15,65 @@
     background-position: center !important;
     width: 100%;
     margin: 0;
-    background: #1c92d2; 
+    background:white;
+    /* background: #1c92d2; 
   background: -webkit-linear-gradient(to right, #f2fcfe, #1c92d2); 
   background: linear-gradient(to right, #f2fcfe, #1c92d2);
-    
+     */
   }
-  .hero-heading{
-    font-size: 5vw;
-    padding-top: 250px;
-    color: black;
-    text-align: center;
-    margin: auto;
-    height: 100%;
-    width: 100%;
-  }
+
+   .hero-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* two equal columns */
+  align-items: center;
+  /* gap: 20px; */
+  padding-top: 50px;
+  padding-left: 40px;
+  /* margin-bottom: 0; */
   
-  .hero-description{
-    text-align: center;
-    color: rgb(238, 223, 196);
-    font-family: "Dancing Script", cursive;
-    font-weight: bolder;
-    font-size: 4vw;
-  }
+}
+
+.hero-heading {
+  padding-top: 30px;
+  font-size: 3.5rem;
+  background: -webkit-linear-gradient(to bottom, var(--color-5), var(--color-2));  
+  background: linear-gradient(to bottom, var(--color-5), var(--color-2));
+  background-size: 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-family: "Marcellus", serif;
+}
+.hero-text {
+  margin-bottom: 20px;
+  line-height: 1.5;
+  text-align: left;
+  align-items: center;
+}
+.hero-description {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.button-container {
+  margin-top: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  align-items: center;
+  gap: 10px;
+}
   .main-button {
     display: flex;
-    justify-content: center;
-    margin-top: 35px;
-    
+    justify-content: center;  
 }
 .main-button a{
     color: black;
@@ -43,13 +84,11 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
-    padding: 14px 36px;
+    padding: 14px 10px;
     text-align: center;
     display: inline-block;
     font-size: 3rem;
     background: #70e1f5; 
-    background: -webkit-linear-gradient(to right, #ffd194, #70e1f5);  
-    background: linear-gradient(to right, #ffd194, #70e1f5);  
     font-weight: bold;
     z-index: 2;
     position: relative;
@@ -57,7 +96,7 @@
     border: none;
   }
   .main-button button:hover{
-    background: var(--color-4);   
+    background: var(--color-6);   
     transform: scale(1.05);
   }
   .mainTitle{

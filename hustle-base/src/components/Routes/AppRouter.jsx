@@ -14,6 +14,7 @@ const AppRouter = () => {
       <div className="min-h-screen bg-gray-100 p-8">
         {/*<NavBar />  ✅ Placed outside Routes */}
         <Routes>
+          /*  Landing Page to open first */
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={<LandingPage />} /> {/* Landing page */}
