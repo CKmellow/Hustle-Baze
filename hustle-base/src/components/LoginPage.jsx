@@ -189,7 +189,7 @@ const [signupData, setSignupData] = useState({
             <option value="">Select Role</option>
             <option value="student">Student</option>
             <option value="employer">Employer</option>
-            <option value="careersOffice">Career's office</option>
+            {/* <option value="careersOffice">Career's office</option> */}
           </select>
          <button type="submit"><span>SignUp</span></button>
         </form>
