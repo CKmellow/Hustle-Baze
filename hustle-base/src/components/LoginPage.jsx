@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 import { toast } from 'sonner';
+import NavBar from './NavBar';
 
 const LoginPage = () => {
-  const [_id, setId] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
-  const [signupData, setSignupData] = useState({
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [errorMessage, setErrorMessage] = useState('');
+const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
+const [signupData, setSignupData] = useState({
     fname: '',
     lname: '',
     _id: '',
@@ -21,7 +22,7 @@ const LoginPage = () => {
   // Handle Login
   const handleLogin = async (e) => {
     e.preventDefault();
-    const loginData = { _id, password };
+    const loginData = {email, password };
 
     try {
       const response = await fetch('http://localhost:5000/login', { 
@@ -104,6 +105,7 @@ const LoginPage = () => {
   };
 
   return (
+     
     <div className="login-container">
       {/* Tabs for toggling between Login and Signup */}
       <div className="tabs">
@@ -124,11 +126,11 @@ const LoginPage = () => {
       <h2>{isLogin ? 'Login' : 'Signup'}</h2>
       {isLogin ? (
         <form onSubmit={handleLogin}>
-          <input
-            type="text"
-            value={_id}
-            onChange={(e) => setId(e.target.value)}
-            placeholder="Enter ID"
+         <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter Email"
             required
           />
           <input
@@ -139,7 +141,7 @@ const LoginPage = () => {
             required
           />
           
-          <button type="submit">Login</button>
+          <button type="submit"><span>Login</span></button>
         </form>
       ) : (
         <form onSubmit={handleSignup}>
@@ -164,6 +166,7 @@ const LoginPage = () => {
             placeholder="Enter ID"
             required
           />
+
           <input
             type="email"
             value={signupData.email}
@@ -185,14 +188,15 @@ const LoginPage = () => {
           >
             <option value="">Select Role</option>
             <option value="student">Student</option>
-            <option value="admin">Admin</option>
-            <option value="staff">Staff</option>
+            <option value="employer">Employer</option>
+            <option value="careersOffice">Career's office</option>
           </select>
-          <button type="submit">Signup</button>
+         <button type="submit"><span>SignUp</span></button>
         </form>
       )}
       {errorMessage && <p className="error-message">{errorMessage}</p>}
     </div>
+ 
   );
 };
 

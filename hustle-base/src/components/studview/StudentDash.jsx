@@ -29,6 +29,7 @@ const StudentDash = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+      
         const response = await axios.get(
           `http://localhost:5000/api/student/${studentID}/application-status-counts`,
           { 

@@ -80,9 +80,9 @@ const authMiddleware = async (req, res, next) => {
 
 // POST: Secure Login
 app.post('/login', async (req, res) => {
-    const { _id, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!_id || !password) {
+    if (!email|| !password) {
         return res.status(400).json({ message: "Both _id and password are required." });
     }
 
@@ -90,11 +90,12 @@ app.post('/login', async (req, res) => {
         const db = await connectToDb();
         const usersCollection = db.collection("users");
 
-        const user = await usersCollection.findOne({ _id: _id });
+        const user = await usersCollection.findOne({ email: email });
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({ message: "Invalid credentials." });
         }
+
 
         // Generate JWT Token
         const token = jwt.sign(

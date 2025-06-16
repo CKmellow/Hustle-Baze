@@ -1,3 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Matemasie&family=Sofadi+One&display=swap');
+*{
+    letter-spacing: 0.5px;
+    word-spacing: normal;
+     font-family: "Sofadi One", system-ui;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+   
+  }
+:root {
+    --color-1: #F72585;
+    --color-2: #B5179E;
+    --color-3: #7209B7;
+    --color-4: #560BAD;
+    --color-5: #3A0CA3;
+    --color-6: #4361EE;
+    --color-7: #4895EF;
+    --color-8: #4CC9F0;
+  }
+  html{
+    font-size: 70%;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    scroll-padding-top: 7rem;
+  }
+
 /* Container */
 .student-dashboard-container {
   max-width: 1080px;
