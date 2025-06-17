@@ -3,8 +3,9 @@ import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { useNavigate } from 'react-router-dom';
 import './Applications.css';
+import ApplicationForm from './ApplicationForm';
 
-const Applications = () => {
+const Applications = ({setActivePage}) => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,6 +16,14 @@ const Applications = () => {
   });
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
+
+   const handleNewApplication = () => {
+    // Set mode to 'new' and clear any existing internship data
+    localStorage.setItem('currentApplication', JSON.stringify({
+      mode: 'new'
+    }));
+    setActivePage('ApplicationForm');
+  };
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -138,7 +147,7 @@ const Applications = () => {
       <div className="applications-header">
         <h1>My Applications</h1>
         <button 
-          onClick={() => navigate('/new-application')}
+          onClick={handleNewApplication}
           className="new-application-btn"
         >
           + New Application

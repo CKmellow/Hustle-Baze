@@ -15,7 +15,7 @@ const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
 const [signupData, setSignupData] = useState({
     fname: '',
     lname: '',
-    _id: '',
+    // _id: '',
     email: '',
     password: '',
     role: '',
@@ -120,7 +120,7 @@ const { fname, lname, _id, email, password, role } = signupData;
         setSignupData({
           fname: '',
           lname: '',
-          _id: '',
+          // _id: '',
           email: '',
           password: '',
           role: '',
@@ -218,13 +218,13 @@ const { fname, lname, _id, email, password, role } = signupData;
             placeholder="Last Name"
             required
           />
-          <input
+          {/* <input
             type="text"
             value={signupData._id}
             onChange={(e) => setSignupData({ ...signupData, _id: e.target.value })}
             placeholder="Enter ID"
             required
-          />
+          /> */}
 
           <input
             type="email"
