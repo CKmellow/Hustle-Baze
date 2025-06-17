@@ -40,8 +40,9 @@
   top: 0;
   right: 0;
   left: 0;
-  background: #ADD8E6;
-  box-shadow: 0rem .1rem .5rem rgba(0,0,0, .1);
+  /* background: #ADD8E6; */
+   background: rgba(0,0,0,.2);
+  box-shadow: 0rem .1rem .5rem rgba(0,0,0, .3);
   height: 120px;
   display: flex;
   justify-content: center;
@@ -65,36 +66,32 @@
   list-style: none;
   align-items: center;
 }
-#navbar-logo{
-  background: var(--color-1);  
-  background: -webkit-linear-gradient(to bottom, var(--color-1), var(--color-7));  
-  background: linear-gradient(to bottom, var(--color-1), var(--color-7)); 
-  background-size: 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  font-size: 2.2rem;
+#navbar-logo {
+  font-size: 2.5rem;
   font-weight: bold;
+  font-family: 'Marcellus', serif;
+  color: var(--color-8);
   text-decoration: none;
-  align-items: center;
-  display: flex;
-  cursor: pointer;
-  font-size: 50px;
+  transition: color 0.3s ease;
 }
-#navbar-logo span{
-  background-color: var(--color-2);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  font-family: "Dancing Script", cursive;
-  font-weight: bolder;
-  font-size: 40px;
+
+#navbar-logo span {
+  color: var(--color-2); /* Highlight 'Base' in a contrasting color */
 }
+
+#navbar-logo:hover {
+  color: var(--color-6); /* Optional hover effect */
+}
+
+#navbar-logo:hover span {
+  color: var(--color-1); /* Optional span hover change */
+}
+
 .navbar-links{
   font-weight: 1.5rem;
   font-size: large;
   text-decoration: underline;
-  color: var(--color-1);
+  color: black;
   display: flex;
   justify-content: center;
   align-items: center;

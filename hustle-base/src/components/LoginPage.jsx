@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 import { toast } from 'sonner';
-import NavBar from './NavBar';
+// import NavBar from './NavBar'; // Adjust the import path as necessary
 
 const LoginPage = () => {
 const [email, setEmail] = useState('');
@@ -15,7 +15,7 @@ const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
 const [signupData, setSignupData] = useState({
     fname: '',
     lname: '',
-    // _id: '',
+     _id: '',
     email: '',
     password: '',
     role: '',
@@ -120,7 +120,7 @@ const { fname, lname, _id, email, password, role } = signupData;
         setSignupData({
           fname: '',
           lname: '',
-          // _id: '',
+          _id: '',
           email: '',
           password: '',
           role: '',
@@ -132,15 +132,15 @@ const { fname, lname, _id, email, password, role } = signupData;
       }
     } catch (error) {
       console.error('Signup error:', error);
-      setErrorMessage('Server error. Please try again later.');
-      toast.error('Server error. Please try again later.');
+      setErrorMessage('Server error. Please kill yourself.');
+      toast.error('Server error. dear christ.');
     }
   };
 
   return (
      
     <div className="login-container">
-      <NavBar />
+      {/* <NavBar /> */}
       {/* Tabs for toggling between Login and Signup */}
       <div className="tabs">
         <div
@@ -218,13 +218,13 @@ const { fname, lname, _id, email, password, role } = signupData;
             placeholder="Last Name"
             required
           />
-          {/* <input
+           <input
             type="text"
             value={signupData._id}
             onChange={(e) => setSignupData({ ...signupData, _id: e.target.value })}
             placeholder="Enter ID"
             required
-          /> */}
+          /> *
 
           <input
             type="email"

@@ -129,7 +129,7 @@ app.post('/login', async (req, res) => {
 
     } catch (error) {
         console.error("Error during login:", error);
-        res.status(500).json({ message: "Server error. Please try again later." });
+        res.status(500).json({ message: "Server error. Please try loggin in later." });
     }
 });
 
@@ -168,7 +168,8 @@ app.post('/signup', async (req, res) => {
             verificationToken,
             createdAt: new Date()
             };
-const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+const verificationLink = `http://localhost:5000/verify-email?token=${verificationToken}`;
+
 
 await transporter.sendMail({
   from: process.env.EMAIL_USER,
@@ -183,37 +184,55 @@ await transporter.sendMail({
         await usersCollection.insertOne(newUser);
         res.status(201).json({ message: "Signup Successful" });
     } catch (error) {
-        console.error("Error during signup:", error);
-        res.status(500).json({ message: "Server error. Please try again later." });
+        console.error("Signup error:", error); // Log the error for debugging
+        res.status(500).json({ message: "Internal Server Error" });
     }
 });
-app.get('/verify-email', async (req, res) => {
-  const token = req.query.token;
-
-  if (!token) {
-    return res.status(400).send('Verification token is missing');
-  }
-
+app.get('/test-email', async (req, res) => {
   try {
-    const db = await connectToDb();
-    const usersCollection = db.collection("users");
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: 'amymugeni@gmail.com',
+      subject: 'Test Email',
+      html: '<h1>This is a test email from HustleBase server!</h1>'
+    });
 
-    const user = await usersCollection.findOne({ verificationToken: token });
+    res.send("Test email sent!");
+  } catch (error) {
+    console.error("Test email error:", error);
+    res.status(500).send("Failed to send test email.");
+  }
+});
 
-    if (!user) {
-      return res.status(400).send('Invalid or expired token');
+app.get('/verify-email', async (req, res) => {
+    const token = req.query.token;
+
+    if (!token) {
+        return res.status(400).send('Invalid or missing token');
     }
 
-    await usersCollection.updateOne(
-      { _id: user._id },
-      { $set: { verified: true }, $unset: { verificationToken: "" } }
-    );
+    try {
+        const db = await connectToDb();
+        const usersCollection = db.collection("users");
 
-    return res.send('Email successfully verified! You can now log in.');
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send('Server error during verification');
-  }
+        const user = await usersCollection.findOne({ verificationToken: token });
+
+        if (!user) {
+            return res.status(400).send('Invalid verification token.');
+        }
+
+        // Update the user to mark them as verified
+        await usersCollection.updateOne(
+            { _id: user._id },
+            { $set: { verified: true }, $unset: { verificationToken: "" } }
+        );
+
+        // ✅ Redirect to login page
+        res.redirect('http://localhost:3000/login');
+    } catch (err) {
+        console.error("Verification error:", err);
+        res.status(500).send("Server error while verifying email.");
+    }
 });
 
 // Applications API Endpoints
@@ -374,7 +393,7 @@ app.get('/api/student/:studentID/application-status-counts', authMiddleware, asy
         res.status(200).json(response);
     } catch (error) {
         console.error("Error getting application counts:", error);
-        res.status(500).json({ message: "Server error. Please try again later." });
+        res.status(500).json({ message: "Server error. Please try no please later." });
     }
 });
 
