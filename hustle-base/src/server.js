@@ -416,6 +416,184 @@ app.post('/api/applications', authMiddleware, async (req, res) => {
 //   }
 // });
 
+// Get student profile
+app.get('/api/students/:id', authMiddleware, async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid student ID format' 
+      });
+    }
+
+    const db = await connectToDb();
+    const student = await db.collection('Students').findOne({ 
+      _id: new ObjectId(req.params.id) 
+    });
+
+    if (!student) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Student not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      data: student
+    });
+
+  } catch (err) {
+    console.error('Error fetching student:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
+// Update student profile
+app.put('/api/students/:id', authMiddleware, async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid student ID format' 
+      });
+    }
+
+    const { fname, lname, studentID, dob, phone, course, yearOfStudy, OrgName, description } = req.body;
+    
+    // Validate required fields
+    if (!studentID || !dob || !OrgName) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Student ID, Date of Birth, and Organization Name are required',
+        missingFields: {
+          required: [
+            ...(!studentID ? ['studentID'] : []),
+            ...(!dob ? ['dob'] : []),
+            ...(!OrgName ? ['OrgName'] : [])
+          ]
+        }
+      });
+    }
+
+    const db = await connectToDb();
+    const result = await db.collection('Students').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: {
+        fname,
+        lname,
+        studentID,
+        dob,
+        phone,
+        course,
+        yearOfStudy,
+        OrgName,
+        description,
+        updatedAt: new Date()
+      }}
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Student not found or no changes made' 
+      });
+    }
+
+    // Return updated student data
+    const updatedStudent = await db.collection('Students').findOne({ 
+      _id: new ObjectId(req.params.id) 
+    });
+
+    res.json({ 
+      success: true,
+      message: 'Profile updated successfully',
+      data: updatedStudent
+    });
+
+  } catch (err) {
+    console.error('Error updating student:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
+// Get profile completion percentage
+app.get('/api/students/:id/completion', authMiddleware, async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid student ID format' 
+      });
+    }
+
+    const db = await connectToDb();
+    const student = await db.collection('Students').findOne({ 
+      _id: new ObjectId(req.params.id) 
+    });
+
+    if (!student) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Student not found' 
+      });
+    }
+
+    const requiredFields = ['studentID', 'dob', 'OrgName'];
+    const optionalFields = ['phone', 'course', 'yearOfStudy', 'description'];
+
+    let score = 0;
+    const missingFields = {
+      required: [],
+      optional: []
+    };
+
+    // Check required fields (1 point each)
+    requiredFields.forEach(field => {
+      if (student[field] && String(student[field]).trim() !== '') {
+        score += 1;
+      } else {
+        missingFields.required.push(field);
+      }
+    });
+
+    // Check optional fields (0.5 points each)
+    optionalFields.forEach(field => {
+      if (student[field] && String(student[field]).trim() !== '') {
+        score += 0.5;
+      } else {
+        missingFields.optional.push(field);
+      }
+    });
+
+    const maxScore = requiredFields.length + (optionalFields.length * 0.5);
+    const percentage = Math.round((score / maxScore) * 100);
+
+    res.json({ 
+      success: true,
+      profileCompletion: percentage,
+      missingFields,
+      lastUpdated: student.updatedAt || student.createdAt
+    });
+
+  } catch (err) {
+    console.error('Profile completion error:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error while calculating completion',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

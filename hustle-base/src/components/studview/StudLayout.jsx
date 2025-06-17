@@ -6,46 +6,68 @@ import Topbar from './Topbar';
 import Applications from './Applications';
 import Internships from './Internships';
 import ApplicationForm from './ApplicationForm';
+import Profile from './Profile'; // Import the new Profile component
 
 const StudentLayout = () => {
-  const [activePage, setActivePage] = useState("dashboard");
+  const [activePage, setActivePage] = useState("Dashboard");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const renderPage = () => {
     switch (activePage) {
-      case "dashboard":
-        return <StudentDash />;
+      case "Dashboard":
+        return <StudentDash setActivePage={setActivePage} />;
       case "Applications":
         return <Applications setActivePage={setActivePage} />;
       case "Internships":
-        return <Internships setActivePage={setActivePage}/> ;
+        return <Internships setActivePage={setActivePage} />;
       case "ApplicationForm":
         return <ApplicationForm setActivePage={setActivePage} />;
-      case "reports":
+      case "Profile":
+        return <Profile setActivePage={setActivePage} />;
+      case "Reports":
         return <div>Progress Reports Page</div>;
-      case "messages":
+      case "Messages":
         return <div>Messages Page</div>;
-      case "resources":
+      case "Resources":
         return <div>Resources Page</div>;
-      case "help":
+      case "Help":
         return <div>Help Page</div>;
-      case "settings":
+      case "Settings":
         return <div>Settings Page</div>;
-      case "logout":
+      case "Logout":
+        // Handle logout logic here
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
         return <div>Logging out...</div>;
       default:
         return <div>Page Not Found</div>;
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
-    <div>
-        <Topbar />
-            <div className="student-layout">
-            <StudentSidebar setActivePage={setActivePage} />
-            <main className="student-main">
-                {renderPage()}
-            </main>
-            </div>
+    <div className={`student-app ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <Topbar 
+        setActivePage={setActivePage} 
+        toggleSidebar={toggleSidebar}
+        sidebarCollapsed={sidebarCollapsed}
+      />
+      
+      <div className="student-layout">
+        <StudentSidebar 
+          setActivePage={setActivePage} 
+          activePage={activePage}
+          collapsed={sidebarCollapsed}
+        />
+        
+        <main className="student-main">
+          {renderPage()}
+        </main>
+      </div>
     </div>
   );
 };

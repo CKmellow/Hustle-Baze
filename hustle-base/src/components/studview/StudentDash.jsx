@@ -1,70 +1,115 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import './StudentDash.css';
 
-const StudentDash = () => {
-  // Get user data from localStorage
+const StudentDash = ({ setActivePage }) => {
   const user = JSON.parse(localStorage.getItem('user'));
   const studentID = user?._id;
 
   const [dashboardData, setDashboardData] = useState({
     profileCompletion: 0,
+    missingFields: {
+      required: [],
+      optional: []
+    },
     applicationCounts: {
       pending: 0,
       accepted: 0,
       rejected: 0
     },
-    alerts: []
+    alerts: [],
+    lastUpdated: null
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  useEffect(() => {
+  const fetchDashboardData = useCallback(async () => {
     if (!studentID) {
       setError("No student ID found. Please log in again.");
       setLoading(false);
       return;
     }
 
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-      
-        const response = await axios.get(
-          `http://localhost:5000/api/student/${studentID}/application-status-counts`,
-          { 
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          }
-        );
-        
-        setDashboardData({
-          profileCompletion: response.data.profileCompletion || 0,
-          applicationCounts: {
-            pending: response.data.pending || 0,
-            accepted: response.data.accepted || 0,
-            rejected: response.data.rejected || 0
-          },
-          alerts: response.data.alerts || []
-        });
-        
-      } catch (err) {
-        console.error("Dashboard error:", err);
-        setError(err.response?.data?.message || "Failed to load dashboard");
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      setLoading(true);
+      setError(null);
 
+      const [countsResponse, completionResponse] = await Promise.all([
+        axios.get(`http://localhost:5000/api/student/${studentID}/application-status-counts`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }).catch(err => ({ 
+          data: { 
+            pending: 0, 
+            accepted: 0, 
+            rejected: 0, 
+            alerts: [] 
+          } 
+        })),
+        
+        axios.get(`http://localhost:5000/api/students/${studentID}/completion`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }).catch(err => ({ 
+          data: { 
+            success: false,
+            profileCompletion: 0, 
+            missingFields: { required: [], optional: [] }
+          }
+        }))
+      ]);
+
+      setDashboardData({
+        profileCompletion: completionResponse.data.success ? 
+          completionResponse.data.profileCompletion : 0,
+        missingFields: completionResponse.data.success ?
+          completionResponse.data.missingFields : 
+          { required: [], optional: [] },
+        applicationCounts: {
+          pending: countsResponse.data.pending || 0,
+          accepted: countsResponse.data.accepted || 0,
+          rejected: countsResponse.data.rejected || 0
+        },
+        alerts: countsResponse.data.alerts || [],
+        lastUpdated: completionResponse.data.lastUpdated || null
+      });
+
+    } catch (err) {
+      console.error("Dashboard error:", err);
+      if (retryCount < 3) {
+        setTimeout(() => setRetryCount(prev => prev + 1), 2000);
+      } else {
+        setError(
+          err.response?.data?.message || 
+          err.message || 
+          "Failed to load dashboard data. Please try again later."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [studentID, retryCount]);
+
+  useEffect(() => {
     fetchDashboardData();
-  }, [studentID]);
+  }, [fetchDashboardData]);
+
+  const handleUpdateProfile = () => {
+    setActivePage('Profile');
+  };
+
+  const getCompletionColor = (percentage) => {
+    if (percentage < 40) return '#ef4444';
+    if (percentage < 80) return '#f59e0b';
+    return '#10b981';
+  };
 
   if (loading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
         <p>Loading your dashboard...</p>
+        {retryCount > 0 && <p>Attempt {retryCount + 1} of 3</p>}
       </div>
     );
   }
@@ -74,7 +119,10 @@ const StudentDash = () => {
       <div className="error-container">
         <p className="error-message">{error}</p>
         <button 
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            setRetryCount(0);
+            fetchDashboardData();
+          }}
           className="retry-button"
         >
           Retry
@@ -88,6 +136,11 @@ const StudentDash = () => {
       <div className="welcome-header">
         <h2>Welcome, {user?.fname} {user?.lname}</h2>
         <p className="student-id">Student ID: {studentID}</p>
+        {dashboardData.lastUpdated && (
+          <p className="last-updated">
+            Last updated: {new Date(dashboardData.lastUpdated).toLocaleString()}
+          </p>
+        )}
       </div>
 
       <div className="dashboard-card profile-card">
@@ -96,15 +149,38 @@ const StudentDash = () => {
           <div className="progress-bar-background">
             <div 
               className="progress-bar-fill"
-              style={{ width: `${dashboardData.profileCompletion}%` }}
+              style={{ 
+                width: `${dashboardData.profileCompletion}%`,
+                backgroundColor: getCompletionColor(dashboardData.profileCompletion)
+              }}
             ></div>
           </div>
         </div>
         <p className="profile-completion-text">
           {dashboardData.profileCompletion}% complete
+          {dashboardData.profileCompletion < 100 && (
+            <span className="completion-hint">
+              {dashboardData.missingFields.required.length > 0 ? 
+                ' Complete required fields' : 
+                ' Add optional details to improve your profile'}
+            </span>
+          )}
         </p>
-        <button className="update-profile-btn">
-          Update Profile
+        
+        {dashboardData.missingFields.required.length > 0 && (
+          <div className="missing-fields">
+            <strong>Missing required:</strong> 
+            {dashboardData.missingFields.required.join(', ')}
+          </div>
+        )}
+        
+        <button 
+          className="update-profile-btn"
+          onClick={handleUpdateProfile}
+        >
+          {dashboardData.profileCompletion < 100 ? 
+            'Complete Profile' : 
+            'Update Profile'}
         </button>
       </div>
 
