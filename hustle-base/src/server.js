@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const port = 5000;
@@ -30,6 +31,13 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
@@ -82,8 +90,8 @@ const authMiddleware = async (req, res, next) => {
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email|| !password) {
-        return res.status(400).json({ message: "Both _id and password are required." });
+    if (!email || !password) {
+        return res.status(400).json({ message: "Both email and password are required." });
     }
 
     try {
@@ -92,23 +100,31 @@ app.post('/login', async (req, res) => {
 
         const user = await usersCollection.findOne({ email: email });
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user) {
             return res.status(400).json({ message: "Invalid credentials." });
         }
 
+        if (!user.verified) {
+            return res.status(401).json({ message: "Please verify your email before logging in." });
+        }
 
-        // Generate JWT Token
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid credentials." });
+        }
+
         const token = jwt.sign(
             { _id: user._id, role: user.role },
             jwtSecret,
             { expiresIn: "2h" }
         );
 
-        res.cookie("token", token, { 
-            httpOnly: true, 
+        res.cookie("token", token, {
+            httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
         });
+
         return res.json({ token, user });
 
     } catch (error) {
@@ -139,15 +155,30 @@ app.post('/signup', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = {
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+            const newUser = {
             fname,
             lname,
             _id,
             email,
             password: hashedPassword,
             role,
+            verified: false,
+            verificationToken,
             createdAt: new Date()
-        };
+            };
+const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+
+await transporter.sendMail({
+  from: process.env.EMAIL_USER,
+  to: email,
+  subject: 'Verify Your Email',
+  html: `<h2>Welcome to HustleBase 👋</h2>
+         <p>Please verify your email by clicking the link below:</p>
+         <a href="${verificationLink}">Verify Email</a>`
+});
+
 
         await usersCollection.insertOne(newUser);
         res.status(201).json({ message: "Signup Successful" });
@@ -155,6 +186,34 @@ app.post('/signup', async (req, res) => {
         console.error("Error during signup:", error);
         res.status(500).json({ message: "Server error. Please try again later." });
     }
+});
+app.get('/verify-email', async (req, res) => {
+  const token = req.query.token;
+
+  if (!token) {
+    return res.status(400).send('Verification token is missing');
+  }
+
+  try {
+    const db = await connectToDb();
+    const usersCollection = db.collection("users");
+
+    const user = await usersCollection.findOne({ verificationToken: token });
+
+    if (!user) {
+      return res.status(400).send('Invalid or expired token');
+    }
+
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { $set: { verified: true }, $unset: { verificationToken: "" } }
+    );
+
+    return res.send('Email successfully verified! You can now log in.');
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Server error during verification');
+  }
 });
 
 // Applications API Endpoints
