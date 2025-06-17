@@ -3,57 +3,62 @@ import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 import  './LandingPage.css';
 import Lottie from 'lottie-react';
-import heroAnimation from './animations/home1.json';
+import heroAnimation from './animations/student.json';
 import buttonAnimation from './animations/button.json';
 import { toast } from 'sonner';
 import NavBar from './NavBar';
 import { FaMapMarker, FaPhone, FaEnvelope, FaFacebook, FaTwitter, FaTelegram, FaInstagram } from 'react-icons/fa';
-const LandingPage = () => {
+const HomePage = () => {
   return (
-    <>
-      <NavBar />
-    <div className="hero">
-      <div
-        className="box"
-        style={{
-          background: `white`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <div className="hero-container">
-          <div className='hero-text'>
-          <p className="hero-heading">Land that job — without the headache</p>
-          <p className="hero-description">We connect students to real job opportunities with zero stress. 
-            No fluff, no fuss — just good gigs, internships, and career moves that make sense.</p>
-            </div>
-          <div className='animation'>
-          <Lottie 
-            animationData={heroAnimation} 
-            loop={true} 
-            style={{ width: '450px', height: '450px',background: 'transparent'}}
-          />
-          </div>
-        </div>
-        <div className='button-container'>
-          <div className='button-animation'> 
-        <Lottie 
-            animationData={buttonAnimation} 
-            loop={true} 
-            style={{ width: '300px', height: '150px', background: 'transparent' }}
-          />
-          </div>
-        <div className="main-button">
-            <button>
-              <a href="/login" className="button-link">Subscribe</a>
-            </button>
-          </div>
-          </div>
+   <>
+       <div className="hero">
+  <NavBar />
+
+  <div className="hero-container">
+    {/* Left Column: Text */}
+    <div className="hero-text">
+      <h1 className="hero-heading">Land that <span className="highlighted">dream job</span> without the headache</h1>
+      <p className="hero-description">We connect students to real job opportunities with zero stress.
+      No fluff, no fuss — just gigs, internships, and career moves that make sense.</p>
+
+      <div className="main-button">
+        <button>
+          <a href="/login" className="button-link">Subscribe</a>
+        </button>
       </div>
     </div>
+
+    {/* Right Column: Animation */}
+    <div className="hero-animation">
+      <Lottie 
+        animationData={heroAnimation} 
+        loop={true} 
+        style={{ width: '300px', height: '300px', background: 'transparent' }}
+      />
+    </div>
+  </div>
+</div>
+<section className="testimonials">
+  <h2 className="testimonial-heading">What Students Are Saying</h2>
+  <div className="testimonial-grid">
+    <div className="testimonial-card">
+      <p className="testimonial-text">"This platform made it so easy to land my first internship. Highly recommend!"</p>
+      <p className="testimonial-name">— Sarah K., University of Nairobi</p>
+    </div>
+    <div className="testimonial-card">
+      <p className="testimonial-text">"I found real jobs, not scams. It’s actually helped me grow professionally."</p>
+      <p className="testimonial-name">— Brian M., Kenyatta University</p>
+    </div>
+    <div className="testimonial-card">
+      <p className="testimonial-text">"Super easy to use, and the employers actually responded to me!"</p>
+      <p className="testimonial-name">— Anita O., Strathmore</p>
+    </div>
+  </div>
+</section>
+
     <section className="footer" id="contact">
       <div className="box-container">
-        {/* About Box */}
+        
         <div className="box">
           <h1>About</h1>
           <div className="text">
@@ -95,12 +100,12 @@ const LandingPage = () => {
 
       {/* Credits */}
       <div className="credits">
-       Bringing employers and employees closer together, one job at a time &copy; 2024 <span>HustleBase.</span> All rights reserved
+       One job at a time &copy; 2024 <span>HustleBase.</span> All rights reserved
       </div>
     </section>
-     </>
      
+    </> 
   );
 };
 
-export default LandingPage; ;
+export default HomePage; 

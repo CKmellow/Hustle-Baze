@@ -1,23 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 import { toast } from 'sonner';
-import NavBar from './NavBar';
+// import NavBar from './NavBar'; // Adjust the import path as necessary
 
 const LoginPage = () => {
 const [email, setEmail] = useState('');
 const [password, setPassword] = useState('');
+const [confirmPassword, setConfirmPassword] = useState('');
+const [showPassword, setShowPassword] = useState(false);
+const [rememberMe, setRememberMe] = useState(false);
 const [errorMessage, setErrorMessage] = useState('');
 const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
 const [signupData, setSignupData] = useState({
     fname: '',
     lname: '',
-    // _id: '',
+     _id: '',
     email: '',
     password: '',
     role: '',
   });
   const navigate = useNavigate();
+
+  // ✅ Auto-login if token and user exist
+  useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+
+    if (token && user) {
+      const parsedUser = JSON.parse(user);
+      if (parsedUser.role === 'student') {
+        navigate('/student');
+      } else if (parsedUser.role === 'employer') {
+        navigate('/employer');
+      } else if (parsedUser.role === 'CareerOfficer') {
+        navigate('/staff');
+      }
+    }
+  }, [navigate]);
 
   // Handle Login
   const handleLogin = async (e) => {
@@ -39,8 +59,14 @@ const [signupData, setSignupData] = useState({
       }
   
       const data = await response.json();
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      if (rememberMe) {
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
+} else {
+  sessionStorage.setItem('token', data.token);
+  sessionStorage.setItem('user', JSON.stringify(data.user));
+}
+
       
       console.log('Login successful:', data);
 
@@ -68,9 +94,15 @@ const [signupData, setSignupData] = useState({
   // Handle Signup
   const handleSignup = async (e) => {
     e.preventDefault();
+    if (signupData.password !== confirmPassword) {
+  setErrorMessage("Passwords do not match.");
+  toast.error("Passwords do not match.");
+  return;
+}
 
+const { fname, lname, _id, email, password, role } = signupData;
     try {
-      const response = await fetch('http://localhost:5000/signup', {
+      const response = await fetch('http://localhost:5000/signup' , {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(signupData),
@@ -88,10 +120,11 @@ const [signupData, setSignupData] = useState({
         setSignupData({
           fname: '',
           lname: '',
-          // _id: '',
+          _id: '',
           email: '',
           password: '',
           role: '',
+         
         });
       } else {
         setErrorMessage(data.message);
@@ -99,14 +132,15 @@ const [signupData, setSignupData] = useState({
       }
     } catch (error) {
       console.error('Signup error:', error);
-      setErrorMessage('Server error. Please try again later.');
-      toast.error('Server error. Please try again later.');
+      setErrorMessage('Server error. Please kill yourself.');
+      toast.error('Server error. dear christ.');
     }
   };
 
   return (
      
     <div className="login-container">
+      {/* <NavBar /> */}
       {/* Tabs for toggling between Login and Signup */}
       <div className="tabs">
         <div
@@ -125,24 +159,49 @@ const [signupData, setSignupData] = useState({
 
       <h2>{isLogin ? 'Login' : 'Signup'}</h2>
       {isLogin ? (
+        
         <form onSubmit={handleLogin}>
-         <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter Email"
-            required
-          />
           <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter Password"
-            required
-          />
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter Email"
+          required
+        />
+        <input
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter Password"
+          required
+        />
+
+        <label className="show-password-toggle">
+          <input
+            type="checkbox"
+            checked={showPassword}
+            onChange={() => setShowPassword(!showPassword)}
+          /> Show Password
+        </label>
+
+        <div className="options">
+          <label className="remember-me">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={() => setRememberMe(!rememberMe)}
+            />
+            Remember Me
+          </label>
+          <a href="#" className="forgot-password">Forgot Password?</a>
+</div>
+
+
           
           <button type="submit"><span>Login</span></button>
+          
         </form>
+        
       ) : (
         <form onSubmit={handleSignup}>
           <input
@@ -159,13 +218,13 @@ const [signupData, setSignupData] = useState({
             placeholder="Last Name"
             required
           />
-          {/* <input
+           <input
             type="text"
             value={signupData._id}
             onChange={(e) => setSignupData({ ...signupData, _id: e.target.value })}
             placeholder="Enter ID"
             required
-          /> */}
+          /> *
 
           <input
             type="email"
@@ -181,6 +240,24 @@ const [signupData, setSignupData] = useState({
             placeholder="Enter Password"
             required
           />
+          {/* Confirm Password Field */}
+          <input
+            type={showPassword ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm Password"
+            required
+          />
+        
+
+          <label className="show-password-toggle">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword(!showPassword)}
+            /> Show Password
+          </label>
+
           <select
             value={signupData.role}
             onChange={(e) => setSignupData({ ...signupData, role: e.target.value })}
