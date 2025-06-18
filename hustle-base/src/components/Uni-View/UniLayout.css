@@ -1,0 +1,138 @@
+:root {
+  --primary: var(--color-3);        /* #7209B7 */
+  --primary-dark: var(--color-4);   /* #560BAD */
+  --highlight: var(--color-1);      /* #F72585 */
+  --accent: var(--color-8);         /* #4CC9F0 */
+  --text-light: #ffffff;
+  --text-dark: #1f1f1f;
+  --sidebar-bg: var(--color-5);     /* #3A0CA3 */
+  --hover: var(--color-6);          /* #4361EE */
+  --background: #f0f0f0;
+}
+
+.career-dashboard {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Sofadi One", system-ui;
+  background-color: var(--background);
+}
+
+.sidebar {
+  width: 280px;
+  background-color: var(--sidebar-bg);
+  color: var(--text-light);
+  padding: 25px 20px;
+  box-shadow: 3px 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h2 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: var(--accent);
+  text-align: center;
+  border-bottom: 2px solid var(--primary-dark);
+  padding-bottom: 10px;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  margin: 20px 0;
+}
+
+.sidebar nav ul li a {
+  color: var(--text-light);
+  text-decoration: none;
+  font-size: 1.5rem;
+  padding: 10px 12px;
+  display: block;
+  border-radius: 6px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.sidebar nav ul li a:hover {
+  background-color: var(--hover);
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 40px;
+  /* background-color: var(--background); */
+}
+
+.main-content h1 {
+ /* background-color: var(--color-8); */
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+  color: var(--text-dark);
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.main-content p {
+  font-size: 1.5rem;
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+.sidebar nav ul li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+.dashboard-widgets {
+  padding: 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-5);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.topbar .left-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.topbar .right-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.topbar .officer-name {
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.sidebar nav ul li button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

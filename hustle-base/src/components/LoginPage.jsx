@@ -32,7 +32,7 @@ const [signupData, setSignupData] = useState({
         navigate('/student');
       } else if (parsedUser.role === 'employer') {
         navigate('/employer');
-      } else if (parsedUser.role === 'CareerOfficer') {
+      } else if (parsedUser.role === 'careerOfficer') {
         navigate('/staff');
       }
     }
@@ -78,7 +78,7 @@ const [signupData, setSignupData] = useState({
         navigate('/student');
       } else if (data.user.role === 'employer') {
         navigate('/employer');
-      } else if (data.user.role === 'CareerOfficer') {
+      } else if (data.user.role === 'careerOfficer') {
         navigate('/staff');
       }
       
