@@ -196,7 +196,8 @@ app.post('/signup', async (req, res) => {
         }
 
         // Send verification email
-        const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+        const verificationLink = `http://localhost:5000/verify-email?token=${verificationToken}`;
+
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
@@ -212,22 +213,6 @@ app.post('/signup', async (req, res) => {
         console.error("Signup error:", error);
         return res.status(500).json({ message: "Internal server error during signup." });
     }
-});
-
-app.get('/test-email', async (req, res) => {
-  try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: 'amymugeni@gmail.com',
-      subject: 'Test Email',
-      html: '<h1>This is a test email from HustleBase server!</h1>'
-    });
-
-    res.send("Test email sent!");
-  } catch (error) {
-    console.error("Test email error:", error);
-    res.status(500).send("Failed to send test email.");
-  }
 });
 
 app.get('/verify-email', async (req, res) => {
@@ -697,6 +682,7 @@ app.get('/api/students/:id/completion', authMiddleware, async (req, res) => {
     });
   }
 });
+// creating the admin table
 
 // Start the server
 app.listen(port, () => {

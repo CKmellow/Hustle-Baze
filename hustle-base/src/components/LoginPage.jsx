@@ -119,7 +119,7 @@ const { fname, lname, email, password, role } = signupData;
         setSignupData({
           fname: '',
           lname: '',
-           email: '',
+          email: '',
           password: '',
           role: '',
          
@@ -216,7 +216,7 @@ const { fname, lname, email, password, role } = signupData;
             placeholder="Last Name"
             required
           />
-           
+
           <input
             type="email"
             value={signupData.email}
