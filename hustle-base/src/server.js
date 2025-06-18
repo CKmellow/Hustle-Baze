@@ -517,7 +517,7 @@ app.get('/api/students/:id', authMiddleware, async (req, res) => {
 
     const db = await connectToDb();
     const student = await db.collection('Students').findOne({ 
-      _id: new ObjectId(req.params.id) 
+       userID: new ObjectId(req.params.id)
     });
 
     if (!student) {
@@ -571,7 +571,7 @@ app.put('/api/students/:id', authMiddleware, async (req, res) => {
 
     const db = await connectToDb();
     const result = await db.collection('Students').updateOne(
-      { _id: new ObjectId(req.params.id) },
+      { userID: new ObjectId(req.params.id) },
       { $set: {
         fname,
         lname,
@@ -595,7 +595,7 @@ app.put('/api/students/:id', authMiddleware, async (req, res) => {
 
     // Return updated student data
     const updatedStudent = await db.collection('Students').findOne({ 
-      _id: new ObjectId(req.params.id) 
+       userID: new ObjectId(req.params.id) 
     });
 
     res.json({ 
