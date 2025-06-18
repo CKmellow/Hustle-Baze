@@ -133,61 +133,87 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// POST: Signup
 app.post('/signup', async (req, res) => {
-    const { fname, lname, _id, email, password, role } = req.body;
-    if (!fname || !lname || !_id || !email || !password || !role) {
-        return res.status(400).json({ message: "All fields are required." });
+    const { fname, lname, email, password, role, OrgName, location, phone, description } = req.body;
+
+    if (!fname || !lname || !email || !password || !role) {
+        return res.status(400).json({ message: "All required fields (fname, lname, email, password, role) must be provided." });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: "Invalid email address." });
+        return res.status(400).json({ message: "Invalid email format." });
     }
 
     try {
         const db = await connectToDb();
         const usersCollection = db.collection("users");
-        
-        const existingUser = await usersCollection.findOne({ $or: [{ _id: _id }, { email: email }] });
+
+        const existingUser = await usersCollection.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: 'User with this ID or email already exists.' });
+            return res.status(400).json({ message: "Email already exists." });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
+        const userId = new ObjectId(); // ObjectId for users table
 
-            const newUser = {
+        const newUser = {
+            _id: userId,
             fname,
             lname,
-            _id,
             email,
             password: hashedPassword,
             role,
             verified: false,
             verificationToken,
             createdAt: new Date()
-            };
-const verificationLink = `http://localhost:5000/verify-email?token=${verificationToken}`;
-
-
-await transporter.sendMail({
-  from: process.env.EMAIL_USER,
-  to: email,
-  subject: 'Verify Your Email',
-  html: `<h2>Welcome to HustleBase 👋</h2>
-         <p>Please verify your email by clicking the link below:</p>
-         <a href="${verificationLink}">Verify Email</a>`
-});
-
+        };
 
         await usersCollection.insertOne(newUser);
-        res.status(201).json({ message: "Signup Successful" });
+
+        // Insert into related collection
+        if (role === 'student') {
+            await db.collection("Students").insertOne({
+                userID: userId,
+                studentID: null, // To be filled in later after login
+                dob: null,
+                phone: "",
+                course: "",
+                yearOfStudy: "",
+                OrgName: "",
+                description: ""
+            });
+        } else if (role === 'employer') {
+            await db.collection("Employers").insertOne({
+                userID: userId,
+                OrgName: OrgName || "",
+                location: location || "",
+                phone: phone || "",
+                email: email,
+                description: description || ""
+            });
+        }
+
+        // Send verification email
+        const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Verify Your Email',
+            html: `<h2>Welcome to HustleBase 👋</h2>
+                   <p>Please verify your email by clicking the link below:</p>
+                   <a href="${verificationLink}">Verify Email</a>`
+        });
+
+        return res.status(201).json({ message: "Signup successful. Please verify your email." });
+
     } catch (error) {
-        console.error("Signup error:", error); // Log the error for debugging
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("Signup error:", error);
+        return res.status(500).json({ message: "Internal server error during signup." });
     }
 });
+
 app.get('/test-email', async (req, res) => {
   try {
     await transporter.sendMail({
@@ -676,3 +702,253 @@ app.get('/api/students/:id/completion', authMiddleware, async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
+
+
+
+async function insertCareerOfficerManually() {
+  const { ObjectId } = require('mongodb');
+  // const bcrypt = require('bcrypt');
+  const db = await connectToDb();
+
+  const staffUserId = new ObjectId();
+  const hashedPassword = await bcrypt.hash("123", 10); // change as needed
+
+  // Insert into Users collection
+  await db.collection('users').insertOne({
+    _id: staffUserId,
+    fname: "cyp",
+    lname: "cyp",
+    email: "cyprian.kamau@strathmore.edu",
+    password: hashedPassword,
+    role: "careerOfficer",
+    verified: true,
+    createdAt: new Date()
+  });
+
+  // Insert into CareerOffice collection
+  await db.collection('careerOffice').insertOne({
+    StaffID: "CO001",
+    userID: staffUserId,
+    Name: "Paul Macharia",
+    OrgName: "Strathmore University",
+    Phone: "0712345678",
+    Email: "pmacharia@strathmore.edu",
+    description: "Handles all student internship verification."
+  });
+
+  console.log("✅ Career Officer added successfully.");
+  process.exit(); // stop server after insert
+}
+
+// ⚠️ Un-comment the line below ONLY when you want to insert the career officer
+//  insertCareerOfficerManually();
+
+// async function seedDatabase() {
+//   try {
+//     const db = client.db('Hustle-db'); // your DB name
+
+//     console.log('🌱 Seeding database...');
+
+
+//     const passwordHash = await bcrypt.hash('password123', 10);
+
+//     const userInserts = [
+//       { email: 'student1@example.com', role: 'student', password: passwordHash },
+//       { email: 'employer1@example.com', role: 'employer', password: passwordHash },
+//       { email: 'officer1@example.com', role: 'careerOfficer', password: passwordHash }
+//     ];
+//     const users = await db.collection('users').insertMany(userInserts);
+//     const [studentUserId, employerUserId, officerUserId] = Object.values(users.insertedIds);
+
+//     await db.collection('Students').insertMany([
+//       {
+//         _id: studentUserId,
+//         fname: 'Alice',
+//         lname: 'Wambui',
+//         email: 'student1@example.com',
+//         studentID: 'S123456',
+//         dob: '2001-05-21',
+//         phone: '0700111222',
+//         course: 'BSc Computer Science',
+//         yearOfStudy: '3',
+//         OrgName: 'Strathmore University',
+//         description: 'Enthusiastic student seeking internships',
+//         createdAt: new Date(),
+//         updatedAt: new Date()
+//       },
+//       {
+//         fname: 'Brian',
+//         lname: 'Kamau',
+//         email: 'student2@example.com',
+//         studentID: 'S654321',
+//         dob: '2002-03-15',
+//         phone: '0700333444',
+//         course: 'BBIT',
+//         yearOfStudy: '2',
+//         OrgName: 'Strathmore University',
+//         description: 'Looking for finance tech opportunities'
+//       },
+//       {
+//         fname: 'Cynthia',
+//         lname: 'Otieno',
+//         email: 'student3@example.com',
+//         studentID: 'S777888',
+//         dob: '2000-12-01',
+//         phone: '0700555666',
+//         course: 'BSc Informatics',
+//         yearOfStudy: '4',
+//         OrgName: 'Strathmore University',
+//         description: 'Skilled in React and backend APIs'
+//       }
+//     ]);
+
+//     await db.collection('Employer').insertMany([
+//       {
+//         _id: employerUserId,
+//         company: 'TechSoft Ltd.',
+//         email: 'employer1@example.com',
+//         website: 'https://techsoft.co.ke',
+//         contact: '0711222333',
+//         description: 'A software development firm based in Nairobi',
+//         createdAt: new Date()
+//       },
+//       {
+//         company: 'DataWorks Kenya',
+//         email: 'employer2@example.com',
+//         website: 'https://dataworks.co.ke',
+//         contact: '0722333444',
+//         description: 'We deal with big data analysis and cloud services.'
+//       },
+//       {
+//         company: 'GreenApps',
+//         email: 'employer3@example.com',
+//         website: 'https://greenapps.org',
+//         contact: '0733444555',
+//         description: 'Sustainable tech and green innovation'
+//       }
+//     ]);
+
+//     await db.collection('CareerOfficers').insertMany([
+//       {
+//         _id: officerUserId,
+//         fname: 'Jane',
+//         lname: 'Mugo',
+//         email: 'officer1@example.com',
+//         phone: '0711777888',
+//         department: 'Career Services',
+//         createdAt: new Date()
+//       },
+//       {
+//         fname: 'Mark',
+//         lname: 'Odhiambo',
+//         email: 'officer2@example.com',
+//         phone: '0722888999',
+//         department: 'Student Affairs'
+//       },
+//       {
+//         fname: 'Linda',
+//         lname: 'Njuguna',
+//         email: 'officer3@example.com',
+//         phone: '0733999000',
+//         department: 'Alumni Relations'
+//       }
+//     ]);
+
+//     const internships = await db.collection('Internships').insertMany([
+//       {
+//         title: 'Frontend Developer Intern',
+//         employerId: employerUserId,
+//         location: 'Remote',
+//         deadline: '2025-08-01',
+//         description: 'Work on React interfaces for internal tools.'
+//       },
+//       {
+//         title: 'Data Analyst Intern',
+//         employerId: employerUserId,
+//         location: 'Nairobi',
+//         deadline: '2025-07-15',
+//         description: 'Analyze and visualize company performance data.'
+//       },
+//       {
+//         title: 'DevOps Intern',
+//         employerId: employerUserId,
+//         location: 'Hybrid',
+//         deadline: '2025-09-10',
+//         description: 'Assist with CI/CD pipelines and monitoring tools.'
+//       }
+//     ]);
+
+//     const internshipIds = Object.values(internships.insertedIds);
+
+//     await db.collection('Applications').insertMany([
+//       {
+//         studentId: studentUserId,
+//         internshipId: internshipIds[0],
+//         status: 'pending',
+//         appliedAt: new Date()
+//       },
+//       {
+//         studentId: studentUserId,
+//         internshipId: internshipIds[1],
+//         status: 'reviewed',
+//         appliedAt: new Date()
+//       },
+//       {
+//         studentId: studentUserId,
+//         internshipId: internshipIds[2],
+//         status: 'accepted',
+//         appliedAt: new Date()
+//       }
+//     ]);
+
+//     await db.collection('Comments').insertMany([
+//       {
+//         internshipId: internshipIds[0],
+//         studentId: studentUserId,
+//         comment: 'Is this internship remote-friendly?',
+//         createdAt: new Date()
+//       },
+//       {
+//         internshipId: internshipIds[1],
+//         studentId: studentUserId,
+//         comment: 'What are the required skills?',
+//         createdAt: new Date()
+//       },
+//       {
+//         internshipId: internshipIds[2],
+//         studentId: studentUserId,
+//         comment: 'How many hours per week?',
+//         createdAt: new Date()
+//       }
+//     ]);
+
+//     await db.collection('Feedback').insertMany([
+//       {
+//         from: 'employer1@example.com',
+//         to: 'student1@example.com',
+//         comment: 'Strong resume and good communication.',
+//         rating: 4
+//       },
+//       {
+//         from: 'employer1@example.com',
+//         to: 'student1@example.com',
+//         comment: 'Needs improvement in Git.',
+//         rating: 3
+//       },
+//       {
+//         from: 'officer1@example.com',
+//         to: 'student1@example.com',
+//         comment: 'Keep working on your portfolio!',
+//         rating: 5
+//       }
+//     ]);
+
+//     console.log('✅ Database seeded with sample data.');
+//   } catch (err) {
+//     console.error('❌ Error during seeding:', err);
+//   } finally {
+//     await client.close();
+//   }
+// }
+
+// seedDatabase()
