@@ -725,6 +725,35 @@ async function insertCareerOfficerManually() {
   console.log("✅ Career Officer added successfully.");
   process.exit(); // stop server after insert
 }
+// view analytics
+app.get('/api/applications/analytics', async (req, res) => {
+  try {
+    const db = await connectToDb(); // your existing DB connection helper
+    const collection = db.collection('Applications');
+
+    const pipeline = [
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+
+    const results = await collection.aggregate(pipeline).toArray();
+
+    // Optional: Convert results to a cleaner format
+    const response = results.reduce((acc, curr) => {
+      acc[curr._id] = curr.count;
+      return acc;
+    }, {});
+
+    res.json(response);
+  } catch (error) {
+    console.error("Analytics fetch error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 // ⚠️ Un-comment the line below ONLY when you want to insert the career officer
 //  insertCareerOfficerManually();

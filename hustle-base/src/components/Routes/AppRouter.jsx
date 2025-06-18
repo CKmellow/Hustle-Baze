@@ -7,7 +7,10 @@ import StudentLayout from '../studview/StudLayout';
 import LoginPage from '../LoginPage';
 import HomePage from '../HomePage';
 import VerifyEmail from '../VerifyEmail';
+import ViewAnalytics from '../Uni-View/ViewAnalytics';
+
 <Route path="/verify-email" element={<VerifyEmail />} />
+
 
 
 const RoleRedirector = () => {
@@ -37,6 +40,7 @@ const AppRouter = () => {
       <div className="min-h-screen bg-gray-100 p-8">
         <Routes>
           {/* Redirects to role-specific dashboard if logged in */}
+
           <Route path="/" element={<RoleRedirector />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={<HomePage />} />
@@ -49,6 +53,7 @@ const AppRouter = () => {
             path="/student"
             element={<ProtectedRoute element={<StudentLayout />} />}
           />
+          <Route path="/analytics" element={<ViewAnalytics />} />
           <Route
             path="/staff"
             element={<ProtectedRoute element={<UniLayout />} />}
