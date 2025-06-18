@@ -99,7 +99,7 @@ const [signupData, setSignupData] = useState({
   return;
 }
 
-const { fname, lname, _id, email, password, role } = signupData;
+const { fname, lname, email, password, role } = signupData;
     try {
       const response = await fetch('http://localhost:5000/signup' , {
         method: 'POST',
