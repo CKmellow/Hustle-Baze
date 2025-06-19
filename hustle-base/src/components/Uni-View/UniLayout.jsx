@@ -39,6 +39,18 @@ const UniLayout = () => {
               <a href="#" onClick={() => setActivePage("dashboard")}><Home size={18} /> Dashboard</a>
             </li>
             <li>
+  <a
+    href="#"
+    onClick={(e) => {
+      e.preventDefault();
+      window.open('/career-profile', '_blank');
+    }}
+  >
+    <UserCircle size={18} /> My Profile
+  </a>
+</li>
+
+            <li>
               <a href="#"  onClick={(e) => {
                   e.preventDefault();
                   window.open('/verify-organizations', '_blank');

@@ -10,6 +10,7 @@ import VerifyEmail from '../VerifyEmail';
 import ViewAnalytics from '../Uni-View/ViewAnalytics';
 import AnalyticsLayout from '../Uni-View/AnalyticsLayout';
 import VerifyOrgLayout from '../Uni-View/VerifyOrgLayout';
+import CareerOfficerProfileLayout from '../Uni-View/CareerOfficerProfileLayout';
 
 <Route path="/verify-email" element={<VerifyEmail />} />
 
@@ -56,6 +57,7 @@ const AppRouter = () => {
             element={<ProtectedRoute element={<StudentLayout />} />}
           />
           <Route path="/analytics" element={<ViewAnalytics />} />
+          <Route path="/career-profile" element={<CareerOfficerProfileLayout />} />
           <Route path="/verify-organizations" element={<VerifyOrgLayout />} />
           <Route path="/analytics-dashboard" element={<AnalyticsLayout />} />
           <Route
