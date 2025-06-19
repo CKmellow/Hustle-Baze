@@ -6,7 +6,7 @@ import Topbar from './Topbar';
 import Applications from './Applications';
 import Internships from './Internships';
 import ApplicationForm from './ApplicationForm';
-import Profile from './Profile'; // Import the new Profile component
+import StudentProfile from './StudentProfile'; // Import the new Profile component
 
 const StudentLayout = () => {
   const [activePage, setActivePage] = useState("Dashboard");
@@ -23,7 +23,7 @@ const StudentLayout = () => {
       case "ApplicationForm":
         return <ApplicationForm setActivePage={setActivePage} />;
       case "Profile":
-        return <Profile setActivePage={setActivePage} />;
+        return <StudentProfile setActivePage={setActivePage} />;
       case "Reports":
         return <div>Progress Reports Page</div>;
       case "Messages":
@@ -41,7 +41,7 @@ const StudentLayout = () => {
         window.location.href = '/login';
         return <div>Logging out...</div>;
       default:
-        return <div>Page Not Found</div>;
+        return <StudentDash setActivePage={setActivePage} />;
     }
   };
 

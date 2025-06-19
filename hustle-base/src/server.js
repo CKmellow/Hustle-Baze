@@ -506,35 +506,56 @@ app.post('/api/applications', authMiddleware, async (req, res) => {
 // });
 
 // Get student profile
-app.get('/api/students/:id', authMiddleware, async (req, res) => {
+// GET student profile by userID
+app.get('/api/students/by-user/:userId', authMiddleware, async (req, res) => {
   try {
-    if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ 
+    const userId = req.params.userId;
+
+    if (!ObjectId.isValid(userId)) {
+      return res.status(400).json({
         success: false,
-        message: 'Invalid student ID format' 
+        message: 'Invalid user ID format'
       });
     }
 
     const db = await connectToDb();
-    const student = await db.collection('Students').findOne({ 
-       userID: new ObjectId(req.params.id)
+
+    // Find the student with matching userID
+    const student = await db.collection('Students').findOne({
+      userID: new ObjectId(userId)
     });
 
     if (!student) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Student not found' 
+        message: 'Student not found for given user ID'
       });
     }
 
+    // Get user info from Users collection
+    const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Associated user not found'
+      });
+    }
+
+    const profile = {
+      ...student,
+      fname: user.fname,
+      lname: user.lname,
+      email: user.email
+    };
+
     res.json({
       success: true,
-      data: student
+      data: profile
     });
-
   } catch (err) {
-    console.error('Error fetching student:', err);
-    res.status(500).json({ 
+    console.error('Error fetching student by userID:', err);
+    res.status(500).json({
       success: false,
       message: 'Server error',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
@@ -542,21 +563,32 @@ app.get('/api/students/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Update student profile
+
+// PUT update student profile
 app.put('/api/students/:id', authMiddleware, async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Invalid student ID format' 
+        message: 'Invalid student ID format'
       });
     }
 
-    const { fname, lname, studentID, dob, phone, course, yearOfStudy, OrgName, description } = req.body;
-    
+    const {
+      fname,
+      lname,
+      studentID,
+      dob,
+      phone,
+      course,
+      yearOfStudy,
+      OrgName,
+      description
+    } = req.body;
+
     // Validate required fields
     if (!studentID || !dob || !OrgName) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         message: 'Student ID, Date of Birth, and Organization Name are required',
         missingFields: {
@@ -569,50 +601,89 @@ app.put('/api/students/:id', authMiddleware, async (req, res) => {
       });
     }
 
-    const db = await connectToDb();
-    const result = await db.collection('Students').updateOne(
-      { userID: new ObjectId(req.params.id) },
-      { $set: {
-        fname,
-        lname,
-        studentID,
-        dob,
-        phone,
-        course,
-        yearOfStudy,
-        OrgName,
-        description,
-        updatedAt: new Date()
-      }}
-    );
-
-    if (result.modifiedCount === 0) {
-      return res.status(404).json({ 
+    // Age check
+    const dobDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - dobDate.getFullYear();
+    const m = today.getMonth() - dobDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+      age--;
+    }
+    if (age < 18) {
+      return res.status(400).json({
         success: false,
-        message: 'Student not found or no changes made' 
+        message: 'Student must be at least 18 years old'
       });
     }
 
-    // Return updated student data
-    const updatedStudent = await db.collection('Students').findOne({ 
-       userID: new ObjectId(req.params.id) 
+    const db = await connectToDb();
+
+    // Update student fields
+    const updateResult = await db.collection('Students').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      {
+        $set: {
+          studentID,
+          dob: dobDate,
+          phone,
+          course,
+          yearOfStudy,
+          OrgName,
+          description,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found or no changes made'
+      });
+    }
+
+    // Update fname and lname in Users (optional, editable)
+    const student = await db.collection('Students').findOne({
+      _id: new ObjectId(req.params.id)
     });
 
-    res.json({ 
+    await db.collection('users').updateOne(
+      { _id: student.userID },
+      {
+        $set: {
+          fname,
+          lname
+        }
+      }
+    );
+
+    // Return updated student + user info
+    const updatedUser = await db.collection('users').findOne({ _id: student.userID });
+    const updatedStudent = await db.collection('Students').findOne({
+      _id: new ObjectId(req.params.id)
+    });
+
+    res.json({
       success: true,
       message: 'Profile updated successfully',
-      data: updatedStudent
+      data: {
+        ...updatedStudent,
+        fname: updatedUser.fname,
+        lname: updatedUser.lname,
+        email: updatedUser.email
+      }
     });
-
   } catch (err) {
     console.error('Error updating student:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: 'Server error',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 });
+
+
 
 // Get profile completion percentage
 app.get('/api/students/:id/completion', authMiddleware, async (req, res) => {
