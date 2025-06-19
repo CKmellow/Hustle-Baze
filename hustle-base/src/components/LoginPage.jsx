@@ -33,7 +33,7 @@ const [signupData, setSignupData] = useState({
       } else if (parsedUser.role === 'employer') {
         navigate('/employer');
       } else if (parsedUser.role === 'careerOfficer') {
-        navigate('/staff');
+        navigate('/career-dashboard');
       }
     }
   }, [navigate]);
@@ -79,7 +79,7 @@ const [signupData, setSignupData] = useState({
       } else if (data.user.role === 'employer') {
         navigate('/employer');
       } else if (data.user.role === 'careerOfficer') {
-        navigate('/staff');
+        navigate('/career-dashboard');
       }
       
     } catch (error) {

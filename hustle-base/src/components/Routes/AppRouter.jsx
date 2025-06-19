@@ -8,6 +8,7 @@ import LoginPage from '../LoginPage';
 import HomePage from '../HomePage';
 import VerifyEmail from '../VerifyEmail';
 import ViewAnalytics from '../Uni-View/ViewAnalytics';
+import AnalyticsLayout from '../Uni-View/AnalyticsLayout';
 
 <Route path="/verify-email" element={<VerifyEmail />} />
 
@@ -26,7 +27,7 @@ const RoleRedirector = () => {
       } else if (user.role === 'employer') {
         navigate('/employer');
       } else if (user.role === 'CareerOfficer') {
-        navigate('/staff');
+        navigate('/career-dashboard');
       }
     }
   }, [navigate]);
@@ -54,8 +55,9 @@ const AppRouter = () => {
             element={<ProtectedRoute element={<StudentLayout />} />}
           />
           <Route path="/analytics" element={<ViewAnalytics />} />
+          <Route path="/analytics-dashboard" element={<AnalyticsLayout />} />
           <Route
-            path="/staff"
+            path="/career-dashboard"
             element={<ProtectedRoute element={<UniLayout />} />}
           />
         </Routes>
