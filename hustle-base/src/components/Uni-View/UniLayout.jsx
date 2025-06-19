@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ViewAnalytics from './ViewAnalytics'; 
-import analyticsLayout from './AnalyticsLayout';
+import AnalyticsLayout from './AnalyticsLayout';
 import { Home, Users, BarChart2, LogOut, UserCircle, Bell, ArrowLeft } from 'lucide-react';
 
 import './UniLayout.css';
@@ -39,13 +39,16 @@ const UniLayout = () => {
               <a href="#" onClick={() => setActivePage("dashboard")}><Home size={18} /> Dashboard</a>
             </li>
             <li>
-              <a href="#"><Users size={18} /> Verify Organizations</a>
+              <a href="#"  onClick={(e) => {
+                  e.preventDefault();
+                  window.open('/verify-organizations', '_blank');
+                }}><Users size={18} /> Verify Organizations</a>
             </li>
             <li>
               <a href="#"  onClick={(e) => {
-      e.preventDefault();
-      window.open('/analytics-dashboard', '_blank');
-    }}
+              e.preventDefault();
+              window.open('/analytics-dashboard', '_blank');
+            }}
   ><BarChart2 size={18} /> Internship Analytics</a>
             </li>
             <li>

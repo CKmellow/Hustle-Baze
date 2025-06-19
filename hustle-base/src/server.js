@@ -754,6 +754,17 @@ app.get('/api/applications/analytics', async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+//verify organizations
+app.get('/api/employers', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const employers = await db.collection('Employer').find().toArray();
+    res.json(employers);
+  } catch (error) {
+    console.error("Error fetching employers:", error);
+    res.status(500).json({ message: "Failed to fetch employers." });
+  }
+});
 
 // ⚠️ Un-comment the line below ONLY when you want to insert the career officer
 //  insertCareerOfficerManually();
