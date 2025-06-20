@@ -4,6 +4,7 @@ import ProtectedRoute from './ProtectedRoute';
 import EmployerLayout from '../EmployerView/EmployerLayout';
 import UniLayout from '../Uni-View/UniLayout';
 import StudentLayout from '../studview/StudLayout';
+import StudentProfile from '../studview/StudentProfile';
 import LoginPage from '../LoginPage';
 import HomePage from '../HomePage';
 import VerifyEmail from '../VerifyEmail';
@@ -64,6 +65,8 @@ const AppRouter = () => {
             path="/career-dashboard"
             element={<ProtectedRoute element={<UniLayout />} />}
           />
+
+          <Route path="/students/profile/:id" element={<StudentProfile />} />
         </Routes>
       </div>
     </Router>
