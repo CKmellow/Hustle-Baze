@@ -442,17 +442,19 @@ app.get('/api/internships', async (req, res) => {
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.single('file'), async (req, res) => {
+app.post('/api/upload', upload.any(), async (req, res) => {
   try {
-    if (!req.file) {
+    if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    res.json({ filePath: req.file.path });
+
+    res.json({ filePath: req.files[0].path }); // return the first file
   } catch (err) {
     console.error("Error uploading file:", err);
     res.status(500).json({ message: "File upload failed" });
   }
 });
+
 
 // Create new application
 app.post('/api/applications', authMiddleware, async (req, res) => {
