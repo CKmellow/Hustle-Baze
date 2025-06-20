@@ -65,38 +65,39 @@ const ApplicationForm = ({setActivePage}) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = async (e, field) => {
-    const file = e.target.files[0];
-    if (!file) return;
+const handleFileChange = async (e, field) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      setError('Only PDF files are allowed');
-      return;
-    }
+  if (file.type !== 'application/pdf') {
+    setError('Only PDF files are allowed');
+    return;
+  }
 
-    try {
-      setFileUploading(true);
-      const formData = new FormData();
-      formData.append(field, file);
+  try {
+    setFileUploading(true);
+    const data = new FormData();
+    data.append(field, file); // field is either 'cv' or 'coverLetter'
 
-      const response = await axios.post(
-        'http://localhost:5000/api/upload',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+    const response = await axios.post(
+      'http://localhost:5000/api/upload',
+      data,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
-      );
+      }
+    );
 
-      setFormData(prev => ({ ...prev, [field]: response.data.filePath }));
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload file');
-    } finally {
-      setFileUploading(false);
-    }
-  };
+    setFormData(prev => ({ ...prev, [field]: response.data.filePath }));
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to upload file');
+    console.error('Upload error:', err);
+  } finally {
+    setFileUploading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

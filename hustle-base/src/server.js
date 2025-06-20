@@ -7,19 +7,19 @@ const crypto = require("crypto");
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const nodemailer = require('nodemailer');
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
+// const cloudinary = require('cloudinary').v2;
+// const cloudinary = require('./cloudinaryConfig');
+const { Readable } = require('stream');
+const cloudinary = require('cloudinary').v2;
 
-const app = express();
-const port = 5000;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-// Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
-app.use(express.json());
-app.use(cookieParser());
-
-// Configure file upload storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = 'uploads/';
@@ -33,6 +33,37 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
+
+const upload = multer({ storage });
+
+
+
+const path = require('path');
+const fs = require('fs');
+const nodemailer = require('nodemailer');
+
+const app = express();
+const port = 5000;
+
+// Middleware
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
+
+// Configure file upload storage
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const uploadDir = 'uploads/';
+//     if (!fs.existsSync(uploadDir)) {
+//       fs.mkdirSync(uploadDir);
+//     }
+//     cb(null, uploadDir);
+//   },
+//   filename: (req, file, cb) => {
+//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+//   }
+// });
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -41,19 +72,19 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const upload = multer({ 
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF files are allowed'), false);
-    }
-  },
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
+// const upload = multer({ 
+//   storage: storage,
+//   fileFilter: (req, file, cb) => {
+//     if (file.mimetype === 'application/pdf') {
+//       cb(null, true);
+//     } else {
+//       cb(new Error('Only PDF files are allowed'), false);
+//     }
+//   },
+//   limits: {
+//     fileSize: 5 * 1024 * 1024 // 5MB limit
+//   }
+// });
 
 const uri = "mongodb+srv://Admin:Hustlebase@hustle-base.goii2xv.mongodb.net/?retryWrites=true&w=majority&appName=Hustle-Base";
 const client = new MongoClient(uri);
@@ -323,50 +354,42 @@ app.post('/api/applications/:id/documents', authMiddleware, upload.fields([
     }
 });
 
-// Download document
-app.get('/api/documents/:filename', authMiddleware, async (req, res) => {
-    try {
-        const filePath = path.join(__dirname, req.params.filename);
-        
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ message: 'File not found' });
-        }
-        
-        res.download(filePath);
-    } catch (err) {
-        console.error("Error downloading document:", err);
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// Delete application
 app.delete('/api/applications/:id', authMiddleware, async (req, res) => {
-    try {
-        const db = await connectToDb();
-        const applicationsCollection = db.collection("Applications");
-        
-        const result = await applicationsCollection.findOneAndDelete({
-            _id: new ObjectId(req.params.id),
-            studentID: req.user._id
-        });
-        
-        if (!result.value) {
-            return res.status(404).json({ message: 'Application not found' });
-        }
-        
-        // Delete associated files if they exist
-        if (result.value.coverLetter) {
-            fs.unlink(result.value.coverLetter, () => {});
-        }
-        if (result.value.cv) {
-            fs.unlink(result.value.cv, () => {});
-        }
-        
-        res.json({ message: 'Application deleted successfully' });
-    } catch (err) {
-        console.error("Error deleting application:", err);
-        res.status(500).json({ message: err.message });
+  try {
+    const db = await connectToDb();
+    const applicationsCollection = db.collection("Applications");
+
+    const result = await applicationsCollection.findOneAndDelete({
+      _id: new ObjectId(req.params.id),
+      studentID: req.user._id
+    });
+
+    if (!result.value) {
+      return res.status(404).json({ message: 'Application not found' });
     }
+
+    // Delete files from Cloudinary using public_id
+    const { coverLetter, cv } = result.value;
+
+    const deleteFromCloudinary = async (doc) => {
+      if (doc && doc.public_id) {
+        try {
+          await cloudinary.uploader.destroy(doc.public_id, {
+            resource_type: 'raw' // because it's a PDF
+          });
+        } catch (err) {
+          console.warn("Cloudinary delete failed for", doc.public_id, err.message);
+        }
+      }
+    };
+
+    await Promise.all([deleteFromCloudinary(coverLetter), deleteFromCloudinary(cv)]);
+
+    res.json({ message: 'Application deleted successfully' });
+  } catch (err) {
+    console.error("Error deleting application:", err);
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // Get application status counts
@@ -442,19 +465,28 @@ app.get('/api/internships', async (req, res) => {
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.any(), async (req, res) => {
+app.post('/api/upload', upload.fields([
+  { name: 'coverLetter', maxCount: 1 },
+  { name: 'cv', maxCount: 1 }
+]), async (req, res) => {
   try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No file uploaded' });
+    const file = req.files.coverLetter?.[0] || req.files.cv?.[0];
+
+    if (!file || !file.path) {
+      return res.status(400).json({ message: 'No file uploaded or file path missing' });
     }
 
-    res.json({ filePath: req.files[0].path }); // return the first file
+    const result = await cloudinary.uploader.upload(file.path, {
+      resource_type: 'auto',
+      folder: 'student_applications'
+    });
+
+    res.json({ filePath: result.secure_url });
   } catch (err) {
-    console.error("Error uploading file:", err);
-    res.status(500).json({ message: "File upload failed" });
+    console.error("Upload error:", err);
+    res.status(500).json({ message: "File upload failed", error: err.message });
   }
 });
-
 
 // Create new application
 app.post('/api/applications', authMiddleware, async (req, res) => {

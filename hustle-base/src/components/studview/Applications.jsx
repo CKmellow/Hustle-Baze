@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { saveAs } from 'file-saver';
 import { useNavigate } from 'react-router-dom';
 import './Applications.css';
-import ApplicationForm from './ApplicationForm';
 
-const Applications = ({setActivePage}) => {
+const Applications = ({ setActivePage }) => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,13 +13,9 @@ const Applications = ({setActivePage}) => {
     sortBy: 'newest'
   });
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
 
-   const handleNewApplication = () => {
-    // Set mode to 'new' and clear any existing internship data
-    localStorage.setItem('currentApplication', JSON.stringify({
-      mode: 'new'
-    }));
+  const handleNewApplication = () => {
+    localStorage.setItem('currentApplication', JSON.stringify({ mode: 'new' }));
     setActivePage('ApplicationForm');
   };
 
@@ -48,7 +42,7 @@ const Applications = ({setActivePage}) => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this application?')) return;
-    
+
     try {
       await axios.delete(`http://localhost:5000/api/applications/${id}`, {
         headers: {
@@ -61,50 +55,9 @@ const Applications = ({setActivePage}) => {
     }
   };
 
-  const handleFileUpload = async (e, applicationId, fileType) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    if (file.type !== 'application/pdf') {
-      setError('Only PDF files are allowed');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append(fileType, file);
-
-    try {
-      const response = await axios.post(
-        `http://localhost:5000/api/applications/${applicationId}/documents`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-      
-      setApplications(applications.map(app => 
-        app._id === applicationId ? response.data : app
-      ));
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload document');
-    }
-  };
-
-  const downloadDocument = async (filePath, filename) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/documents/${filePath}`, {
-        responseType: 'blob',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      saveAs(response.data, filename);
-    } catch (err) {
-      setError('Failed to download document');
-    }
+  const downloadDocument = (fileUrl) => {
+    if (!fileUrl) return;
+    window.open(fileUrl, '_blank');
   };
 
   const getStatusBadge = (status) => {
@@ -132,10 +85,7 @@ const Applications = ({setActivePage}) => {
     return (
       <div className="error-container">
         <p className="error-message">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="retry-button"
-        >
+        <button onClick={() => window.location.reload()} className="retry-button">
           Retry
         </button>
       </div>
@@ -146,10 +96,7 @@ const Applications = ({setActivePage}) => {
     <div className="applications-container">
       <div className="applications-header">
         <h1>My Applications</h1>
-        <button 
-          onClick={handleNewApplication}
-          className="new-application-btn"
-        >
+        <button onClick={handleNewApplication} className="new-application-btn">
           + New Application
         </button>
       </div>
@@ -160,14 +107,14 @@ const Applications = ({setActivePage}) => {
             type="text"
             placeholder="Search by title or company"
             value={filters.search}
-            onChange={(e) => setFilters({...filters, search: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
         </div>
-        
+
         <div className="status-filter">
           <select
             value={filters.status}
-            onChange={(e) => setFilters({...filters, status: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -175,11 +122,11 @@ const Applications = ({setActivePage}) => {
             <option value="rejected">Rejected</option>
           </select>
         </div>
-        
+
         <div className="sort-filter">
           <select
             value={filters.sortBy}
-            onChange={(e) => setFilters({...filters, sortBy: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -195,7 +142,7 @@ const Applications = ({setActivePage}) => {
           <div>Status</div>
           <div>Actions</div>
         </div>
-        
+
         {applications.length > 0 ? (
           applications.map((application) => (
             <div key={application._id} className="application-row">
@@ -203,68 +150,47 @@ const Applications = ({setActivePage}) => {
                 <h3>{application.internship?.title || 'N/A'}</h3>
                 <p>{new Date(application.createdAt).toLocaleDateString()}</p>
               </div>
-              
+
               <div>
                 <p>{application.internship?.company || 'N/A'}</p>
               </div>
-              
+
               <div className="documents-column">
                 <div className="document-upload">
                   <label>
                     Cover Letter
-                    {application.coverLetter ? (
-                      <button 
-                        onClick={() => downloadDocument(application.coverLetter, 'coverletter.pdf')}
+                    {application.coverLetter && (
+                      <button
+                        onClick={() => downloadDocument(application.coverLetter)}
                         className="download-btn"
                       >
                         View
                       </button>
-                    ) : (
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(e) => handleFileUpload(e, application._id, 'coverLetter')}
-                      />
                     )}
                   </label>
                 </div>
-                
+
                 <div className="document-upload">
                   <label>
                     CV
-                    {application.cv ? (
-                      <button 
-                        onClick={() => downloadDocument(application.cv, 'cv.pdf')}
+                    {application.cv && (
+                      <button
+                        onClick={() => downloadDocument(application.cv)}
                         className="download-btn"
                       >
                         View
                       </button>
-                    ) : (
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(e) => handleFileUpload(e, application._id, 'cv')}
-                      />
                     )}
                   </label>
                 </div>
               </div>
-              
+
               <div>
                 {getStatusBadge(application.status || 'pending')}
               </div>
-              
+
               <div className="actions-column">
-                <button 
-                  onClick={() => navigate(`/applications/${application._id}`)}
-                  className="edit-btn"
-                >
-                  Edit
-                </button>
-                <button 
-                  onClick={() => handleDelete(application._id)}
-                  className="delete-btn"
-                >
+                <button onClick={() => handleDelete(application._id)} className="delete-btn">
                   Delete
                 </button>
               </div>
