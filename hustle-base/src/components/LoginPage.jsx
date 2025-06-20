@@ -32,8 +32,8 @@ const [signupData, setSignupData] = useState({
         navigate('/student');
       } else if (parsedUser.role === 'employer') {
         navigate('/employer');
-      } else if (parsedUser.role === 'CareerOfficer') {
-        navigate('/staff');
+      } else if (parsedUser.role === 'careerOfficer') {
+        navigate('/career-dashboard');
       }
     }
   }, [navigate]);
@@ -78,8 +78,8 @@ const [signupData, setSignupData] = useState({
         navigate('/student');
       } else if (data.user.role === 'employer') {
         navigate('/employer');
-      } else if (data.user.role === 'CareerOfficer') {
-        navigate('/staff');
+      } else if (data.user.role === 'careerOfficer') {
+        navigate('/career-dashboard');
       }
       
     } catch (error) {

@@ -1,0 +1,112 @@
+/* Global Styles from your base */
+* {
+  letter-spacing: 0.5px;
+  word-spacing: normal;
+  font-family: "Sofadi One", system-ui;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-1: #F72585;
+  --color-2: #B5179E;
+  --color-3: #7209B7;
+  --color-4: #560BAD;
+  --color-5: #3A0CA3;
+  --color-6: #4361EE;
+  --color-7: #4895EF;
+  --color-8: #4CC9F0;
+}
+
+/* Component Styles */
+.verify-orgs {
+  padding: 2rem;
+  /* background-color: var(--color-8); */
+  color: #333;
+  border-radius: 12px;
+  margin: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.verify-orgs h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: black;
+  border-bottom: 3px solid var(--color-6);
+  padding-bottom: 0.5rem;
+}
+
+.verify-orgs table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  color: #222;
+}
+
+.verify-orgs th,
+.verify-orgs td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.verify-orgs th {
+  background-color: var(--color-6);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.verify-orgs tr:hover {
+    background-color: var(--color-7);
+  color: white;
+}
+
+.verify-orgs td a {
+  color: var(--color-3);
+  text-decoration: none;
+}
+
+.verify-orgs td a:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+.verify-orgs button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-right: 5px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+
+.verify-orgs button:hover {
+  transform: scale(1.05);
+}
+
+/* Verify button */
+.verify-orgs button:first-of-type {
+  background-color: var(--color-1);
+  color: white;
+}
+
+.verify-orgs button:first-of-type:hover {
+  background-color: var(--color-2);
+}
+
+/* Report button */
+.verify-orgs button:last-of-type {
+  background-color: var(--color-5);
+  color: white;
+}
+
+.verify-orgs button:last-of-type:hover {
+  background-color: var(--color-3);
+}

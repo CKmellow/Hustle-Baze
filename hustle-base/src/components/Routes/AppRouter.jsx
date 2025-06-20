@@ -8,7 +8,13 @@ import StudentProfile from '../studview/StudentProfile';
 import LoginPage from '../LoginPage';
 import HomePage from '../HomePage';
 import VerifyEmail from '../VerifyEmail';
+import ViewAnalytics from '../Uni-View/ViewAnalytics';
+import AnalyticsLayout from '../Uni-View/AnalyticsLayout';
+import VerifyOrgLayout from '../Uni-View/VerifyOrgLayout';
+import CareerOfficerProfileLayout from '../Uni-View/CareerOfficerProfileLayout';
+
 <Route path="/verify-email" element={<VerifyEmail />} />
+
 
 
 const RoleRedirector = () => {
@@ -24,7 +30,7 @@ const RoleRedirector = () => {
       } else if (user.role === 'employer') {
         navigate('/employer');
       } else if (user.role === 'CareerOfficer') {
-        navigate('/staff');
+        navigate('/career-dashboard');
       }
     }
   }, [navigate]);
@@ -38,6 +44,7 @@ const AppRouter = () => {
       <div className="min-h-screen bg-gray-100 p-8">
         <Routes>
           {/* Redirects to role-specific dashboard if logged in */}
+
           <Route path="/" element={<RoleRedirector />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={<HomePage />} />
@@ -50,8 +57,12 @@ const AppRouter = () => {
             path="/student"
             element={<ProtectedRoute element={<StudentLayout />} />}
           />
+          <Route path="/analytics" element={<ViewAnalytics />} />
+          <Route path="/career-profile" element={<CareerOfficerProfileLayout />} />
+          <Route path="/verify-organizations" element={<VerifyOrgLayout />} />
+          <Route path="/analytics-dashboard" element={<AnalyticsLayout />} />
           <Route
-            path="/staff"
+            path="/career-dashboard"
             element={<ProtectedRoute element={<UniLayout />} />}
           />
 
