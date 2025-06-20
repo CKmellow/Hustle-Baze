@@ -697,7 +697,7 @@ app.get('/api/students/:id/completion', authMiddleware, async (req, res) => {
 
     const db = await connectToDb();
     const student = await db.collection('Students').findOne({ 
-      _id: new ObjectId(req.params.id) 
+      userID: new ObjectId(req.params.id)
     });
 
     if (!student) {

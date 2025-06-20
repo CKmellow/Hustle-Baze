@@ -48,6 +48,7 @@ const StudentDash = ({ setActivePage }) => {
           } 
         })),
         
+        
         axios.get(`http://localhost:5000/api/students/${studentID}/completion`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }).catch(err => ({ 
