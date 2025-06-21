@@ -1,0 +1,122 @@
+.internships-section {
+  padding: 5rem 2rem;
+  background: linear-gradient(135deg, var(--color-8), #fff);
+  color: #222;
+  text-align: center;
+  font-family: "Sofadi One", system-ui;
+}
+
+.internships-section h2 {
+  font-size: 3rem;
+  color: var(--color-3);
+  margin-bottom: 0.5rem;
+}
+
+.internships-section p {
+  font-size: 1.4rem;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.filters {
+  margin-bottom: 2rem;
+}
+
+.filters button {
+  background: var(--color-6);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  margin: 0 0.5rem;
+  border-radius: 25px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.filters button.active,
+.filters button:hover {
+  background: var(--color-3);
+}
+
+.internship-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+  padding: 2rem;
+}
+
+.internship-card {
+  background: #fff;
+  border-left: 6px solid var(--color-6);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  opacity: 0;
+  animation: fadeIn 0.6s forwards;
+}
+
+.internship-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.internship-card h3 {
+  font-size: 1.8rem;
+  color: var(--color-4);
+  margin-bottom: 0.8rem;
+}
+
+.internship-card p {
+  font-size: 1.2rem;
+  color: #555;
+  margin: 0.4rem 0;
+}
+
+.badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+}
+
+.badge.remote {
+  background: var(--color-1);
+}
+.badge.onsite {
+  background: var(--color-5);
+}
+.badge.hybrid {
+  background: var(--color-2);
+}
+
+.apply-btn {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.4rem;
+  background: var(--color-1);
+  color: white;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.apply-btn:hover {
+  background: var(--color-2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
