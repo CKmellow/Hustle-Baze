@@ -465,23 +465,12 @@ app.get('/api/internships', async (req, res) => {
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.fields([
-  { name: 'coverLetter', maxCount: 1 },
-  { name: 'cv', maxCount: 1 }
-]), async (req, res) => {
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
-    const file = req.files.coverLetter?.[0] || req.files.cv?.[0];
-
-    if (!file || !file.path) {
-      return res.status(400).json({ message: 'No file uploaded or file path missing' });
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
     }
-
-    const result = await cloudinary.uploader.upload(file.path, {
-      resource_type: 'auto',
-      folder: 'student_applications'
-    });
-
-    res.json({ filePath: result.secure_url });
+    res.json({ filePath: req.file.path });
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ message: "File upload failed", error: err.message });
