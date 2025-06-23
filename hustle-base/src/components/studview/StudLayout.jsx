@@ -24,16 +24,16 @@ const StudentLayout = () => {
         return <ApplicationForm setActivePage={setActivePage} />;
       case "Profile":
         return <StudentProfile setActivePage={setActivePage} />;
-      case "Reports":
-        return <div>Progress Reports Page</div>;
-      case "Messages":
-        return <div>Messages Page</div>;
-      case "Resources":
-        return <div>Resources Page</div>;
-      case "Help":
-        return <div>Help Page</div>;
-      case "Settings":
-        return <div>Settings Page</div>;
+      // case "Reports":
+      //   return <div>Progress Reports Page</div>;
+      // case "Messages":
+      //   return <div>Messages Page</div>;
+      // case "Resources":
+      //   return <div>Resources Page</div>;
+      // case "Help":
+      //   return <div>Help Page</div>;
+      // case "Settings":
+      //   return <div>Settings Page</div>;
       case "Logout":
         // Handle logout logic here
         localStorage.removeItem('token');
