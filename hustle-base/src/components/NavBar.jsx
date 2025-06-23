@@ -20,13 +20,13 @@ const NavBar = () => {
         <ul className="navbar-menu">
           {/* <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" /> */}
           <li className="navbar-item">
-            <Link to="/LandingPage" className="navbar-links">Home</Link>
+            <Link to="/home" className="navbar-links">Home</Link>
           </li>
           <li className="navbar-item">
-            <Link to="/activities" className="navbar-links">Explore</Link>
+            <Link to="/AvailableInternships" className="navbar-links">Explore</Link>
           </li>
           <li className="navbar-item">
-            <Link to="/hiddenGems" className="navbar-links">Contacts</Link>
+            <Link to="/contact" className="navbar-links">Contacts</Link>
           </li>
           <li className="navbar-button">
             <Link to="/login" className="button">Sign in</Link>

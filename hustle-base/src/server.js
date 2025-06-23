@@ -91,6 +91,7 @@ const client = new MongoClient(uri);
 const jwtSecret = process.env.JWT_SECRET;
 // console.log("Loaded JWT Secret:", jwtSecret);
 
+
 // Connect to the MongoDB database
 async function connectToDb() {
     try {
@@ -465,23 +466,12 @@ app.get('/api/internships', async (req, res) => {
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.fields([
-  { name: 'coverLetter', maxCount: 1 },
-  { name: 'cv', maxCount: 1 }
-]), async (req, res) => {
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
-    const file = req.files.coverLetter?.[0] || req.files.cv?.[0];
-
-    if (!file || !file.path) {
-      return res.status(400).json({ message: 'No file uploaded or file path missing' });
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
     }
-
-    const result = await cloudinary.uploader.upload(file.path, {
-      resource_type: 'auto',
-      folder: 'student_applications'
-    });
-
-    res.json({ filePath: result.secure_url });
+    res.json({ filePath: req.file.path });
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ message: "File upload failed", error: err.message });
@@ -885,6 +875,90 @@ app.get('/api/career-office/:staffId', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+async function fixEmployerSchema() {
+  try {
+    const db = await connectToDb();
+    const employerCollection = db.collection("Employer");
+
+    const result = await employerCollection.updateMany(
+      { verified: { $exists: false } },
+      { $set: { verified: false } }
+      
+    );
+
+    console.log(`✅ Updated ${result.modifiedCount} employers with verified: false`);
+  } catch (error) {
+    console.error("❌ Error updating employer schema:", error);
+  }
+}
+
+fixEmployerSchema();
+
+
+// handling the actual verification of employers
+// ✅ Verify Employer
+app.patch('/api/employers/:id/verify', async (req, res) => {
+  const employerId = req.params.id;
+
+  try {
+    const db = await connectToDb();
+    const employerCollection = db.collection("Employer");
+
+    const result = await employerCollection.updateOne(
+      { _id: new ObjectId(employerId) },
+      {
+        $set: {
+          verified: true,
+          reported: false,
+          verificationDate: new Date()
+        }
+      }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json({ message: "Employer verified successfully." });
+    } else {
+      res.status(404).json({ message: "Employer not found." });
+    }
+  } catch (error) {
+    console.error("Error verifying employer:", error);
+    res.status(500).json({ message: "Server error while verifying employer." });
+  }
+});
+
+// ⚠️ Report Employer
+app.post('/api/employers/:id/report', async (req, res) => {
+  const employerId = req.params.id;
+
+  try {
+    const db = await connectToDb();
+    const employerCollection = db.collection("Employer");
+
+    const result = await employerCollection.updateOne(
+      { _id: new ObjectId(employerId) },
+      {
+        $set: {
+          verified: false,
+          reported: true,
+          reportReason: req.body.reason || "Flagged as suspicious",
+          reportDate: new Date()
+        }
+      }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json({ message: "Employer reported and verification removed." });
+    } else {
+      res.status(404).json({ message: "Employer not found." });
+    }
+  } catch (error) {
+    console.error("Error reporting employer:", error);
+    res.status(500).json({ message: "Server error while reporting employer." });
+  }
+});
+
+
 // Update career officer's profile
 app.put('/api/career-office/:staffId', async (req, res) => {
   const { staffId } = req.params;
@@ -903,6 +977,70 @@ app.put('/api/career-office/:staffId', async (req, res) => {
   } catch (err) {
     console.error("Update officer error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+});
+// fixing some issues with the Internships schema
+// async function linkInternshipsToEmployers() {
+//   try {
+//     const db = await connectToDb();
+//     const internshipCollection = db.collection("Internships");
+//     const employerCollection = db.collection("Employer");
+
+//     const internships = await internshipCollection.find().toArray();
+
+//     for (const internship of internships) {
+//       const employerEmail = internship.employerEmail;
+
+//       if (!employerEmail) {
+//         console.warn(`⚠️ Skipping internship ${internship._id}: No employerEmail found.`);
+//         continue;
+//       }
+
+//       const employer = await employerCollection.findOne({ email: employerEmail });
+
+//       if (!employer) {
+//         console.warn(`❌ No employer found for internship email: ${employerEmail}`);
+//         continue;
+//       }
+
+//       const updateResult = await internshipCollection.updateOne(
+//         { _id: internship._id },
+//         { $set: { employerId: employer._id } }
+//       );
+
+//       console.log(`✅ Linked internship ${internship._id} to employer ${employer._id}`);
+//     }
+
+//     console.log("🎉 Linking complete.");
+//   } catch (error) {
+//     console.error("❌ Error linking internships to employers:", error);
+//   }
+// }
+
+// linkInternshipsToEmployers();
+
+// GET internships with employer data
+app.get('/api/internships', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const internships = await db.collection("Internships").aggregate([
+      {
+        $lookup: {
+          from: "Employer",
+          localField: "employerId",
+          foreignField: "_id",
+          as: "employer"
+        }
+      },
+      { $unwind: "$employer" }, // Flatten employer array
+      { $match: { "employer.verified": true } }, // Show only verified
+      { $sort: { postedAt: -1 } } // Optional: newest first
+    ]).toArray();
+
+    res.json(internships);
+  } catch (err) {
+    console.error("Error fetching internships:", err);
+    res.status(500).json({ message: "Server error fetching internships" });
   }
 });
 

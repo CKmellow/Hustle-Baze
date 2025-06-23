@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ViewAnalytics from './ViewAnalytics'; // ✅ Import chart component
-import './UniLayout.css'; // Or your custom style file
+import './Analytics.css'; // Or your custom style file
 
 const AnalyticsLayout = () => {
   const navigate = useNavigate();

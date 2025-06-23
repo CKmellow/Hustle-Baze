@@ -7,6 +7,8 @@ import heroAnimation from './animations/student.json';
 import buttonAnimation from './animations/button.json';
 import { toast } from 'sonner';
 import NavBar from './NavBar';
+import AvailableInternships from './AvailableInternships'; // adjust path if needed
+
 import { FaMapMarker, FaPhone, FaEnvelope, FaFacebook, FaTwitter, FaTelegram, FaInstagram } from 'react-icons/fa';
 const HomePage = () => {
   return (
@@ -38,6 +40,7 @@ const HomePage = () => {
     </div>
   </div>
 </div>
+<AvailableInternships />
 <section className="testimonials">
   <h2 className="testimonial-heading">What Students Are Saying</h2>
   <div className="testimonial-grid">
