@@ -1,0 +1,11 @@
+.employer-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.employer-main {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: #f1f5f9; /* same light gray as student layout */
+  overflow-y: auto;
+}

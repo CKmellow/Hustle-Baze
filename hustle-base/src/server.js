@@ -217,7 +217,7 @@ app.post('/signup', async (req, res) => {
                 description: ""
             });
         } else if (role === 'employer') {
-            await db.collection("Employers").insertOne({
+            await db.collection("Employer").insertOne({
                 userID: userId,
                 OrgName: OrgName || "",
                 location: location || "",
@@ -431,6 +431,45 @@ app.get('/api/student/:studentID/application-status-counts', authMiddleware, asy
         res.status(500).json({ message: "Server error. Please try no please later." });
     }
 });
+
+// Employer application status counts endpoint
+app.get('/api/employers/:employerID/application-status-counts', authMiddleware, async (req, res) => {
+  const ObjectId = require('mongodb').ObjectId;
+  const employerID = req.params.employerID;
+
+  if (!ObjectId.isValid(employerID)) {
+    return res.status(400).json({ success: false, message: 'Invalid employer ID' });
+  }
+
+  try {
+    const db = await connectToDb();
+    const applicationsCollection = db.collection("Applications");
+
+    const counts = await applicationsCollection.aggregate([
+      { $match: { employerID: new ObjectId(employerID) } },
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]).toArray();
+
+    const response = {
+      pending: 0,
+      accepted: 0,
+      rejected: 0
+    };
+
+    counts.forEach(item => {
+      const key = item._id.toLowerCase();
+      if (response.hasOwnProperty(key)) {
+        response[key] = item.count;
+      }
+    });
+
+    res.status(200).json({ success: true, applicationCounts: response });
+  } catch (error) {
+    console.error("Employer application counts error:", error);
+    res.status(500).json({ success: false, message: "Server error. Try again later." });
+  }
+});
+
 
 // Get all internships with filters
 app.get('/api/internships', async (req, res) => {
@@ -777,7 +816,270 @@ app.get('/api/students/:id/completion', authMiddleware, async (req, res) => {
     });
   }
 });
+
+// GET employer profile completion + internship count
+app.get('/api/employers/:id/completion', authMiddleware, async (req, res) => {
+  const ObjectId = require('mongodb').ObjectId;
+
+  try {
+    const userId = req.params.id;
+
+    if (!ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid employer user ID format'
+      });
+    }
+
+    const db = await connectToDb();
+
+    // Fetch employer by userID
+    const employer = await db.collection('Employer').findOne({ userID: new ObjectId(userId) });
+
+    if (!employer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Employer not found for given user ID'
+      });
+    }
+
+    // Profile completeness fields
+    const requiredFields = ['OrgName'];
+    const optionalFields = ['location', 'phone', 'description', 'requestVerification'];
+
+    let score = 0;
+    const missingFields = {
+      required: [],
+      optional: []
+    };
+
+    // Evaluate required fields
+    requiredFields.forEach(field => {
+      if (employer[field] && String(employer[field]).trim() !== '') {
+        score += 1;
+      } else {
+        missingFields.required.push(field);
+      }
+    });
+
+    // Evaluate optional fields
+    optionalFields.forEach(field => {
+      if (
+        typeof employer[field] === 'boolean' || 
+        (employer[field] && String(employer[field]).trim() !== '')
+      ) {
+        score += 0.5;
+      } else {
+        missingFields.optional.push(field);
+      }
+    });
+
+    const maxScore = requiredFields.length + (optionalFields.length * 0.5);
+    const percentage = Math.round((score / maxScore) * 100);
+
+    // Count internships posted by employer
+    const internshipCount = await db.collection('Internships').countDocuments({
+      employerID: new ObjectId(userId)
+    });
+
+    res.json({
+      success: true,
+      profileCompletion: percentage,
+      missingFields,
+      internshipCount,
+      lastUpdated: employer.updatedAt || employer.createdAt
+    });
+
+  } catch (err) {
+    console.error('Employer completion error:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while calculating employer profile completeness',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
 // creating the admin table
+
+app.get('/api/employers/by-user/:userId', authMiddleware, async (req, res) => {
+  const userId = req.params.userId;
+  if (!ObjectId.isValid(userId)) {
+    return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+  }
+
+  const db = await connectToDb();
+  const employer = await db.collection('Employer').findOne({ userID: new ObjectId(userId) });
+  const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+
+  if (!employer || !user) {
+    return res.status(404).json({ success: false, message: 'Employer or user not found' });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...employer,
+      fname: user.fname,
+      lname: user.lname,
+      email: user.email
+    }
+  });
+});
+
+app.put('/api/employers/:id', authMiddleware, async (req, res) => {
+  const employerId = req.params.id;
+  if (!ObjectId.isValid(employerId)) {
+    return res.status(400).json({ success: false, message: 'Invalid employer ID' });
+  }
+
+  const {
+    fname,
+    lname,
+    OrgName,
+    location,
+    phone,
+    description,
+    requestVerification
+  } = req.body;
+
+  if (!OrgName) {
+    return res.status(400).json({
+      success: false,
+      message: 'Organization Name is required',
+      missingFields: { required: ['OrgName'] }
+    });
+  }
+
+  const db = await connectToDb();
+
+  const employer = await db.collection('Employer').findOne({ _id: new ObjectId(employerId) });
+  if (!employer) {
+    return res.status(404).json({ success: false, message: 'Employer not found' });
+  }
+
+  await db.collection('Employer').updateOne(
+    { _id: new ObjectId(employerId) },
+    {
+      $set: {
+        OrgName,
+        location,
+        phone,
+        description,
+        requestVerification: !!requestVerification,
+        updatedAt: new Date()
+      }
+    }
+  );
+
+  await db.collection('users').updateOne(
+    { _id: employer.userID },
+    {
+      $set: {
+        fname,
+        lname
+      }
+    }
+  );
+
+  res.json({ success: true, message: 'Profile updated successfully' });
+});
+
+// GET internships by employer ID
+app.get('/api/employers/:id/internships', authMiddleware, async (req, res) => {
+  const ObjectId = require('mongodb').ObjectId;
+  const employerId = req.params.id;
+
+  if (!ObjectId.isValid(employerId)) {
+    return res.status(400).json({ success: false, message: 'Invalid employer ID' });
+  }
+
+  try {
+    const db = await connectToDb();
+    const internships = await db.collection('Internships')
+      .find({ employerId: new ObjectId(employerId) })
+      .toArray();
+
+    res.status(200).json({ success: true, internships });
+  } catch (error) {
+    console.error("Error fetching internships:", error);
+    res.status(500).json({ success: false, message: "Server error. Please try again later." });
+  }
+});
+
+app.post('/api/create/internships', authMiddleware, async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const userId = new ObjectId(req.user.id); // from token
+    const employer = await db.collection('Employer').findOne({ userID: userId });
+
+    if (!employer) {
+      return res.status(404).json({ success: false, message: 'Employer not found' });
+    }
+
+    const newInternship = {
+      title: req.body.title,
+      company: employer.OrgName,
+      location: req.body.location,
+      duration: req.body.duration,
+      stipend: req.body.stipend,
+      description: req.body.description,
+      requirements: req.body.requirements,
+      employerId: employer._id,
+      employerEmail: employer.email,
+      verified: employer.verified,
+      type: req.body.type,
+      experience: req.body.experience,
+      deadline: new Date(req.body.deadline)
+    };
+
+
+    const result = await db.collection('Internships').insertOne(newInternship);
+    res.status(201).json({ success: true, internship: result.ops?.[0] ?? newInternship });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to create internship' });
+  }
+});
+
+app.put('/api/internships/:id', authMiddleware, async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const internshipId = new ObjectId(req.params.id);
+
+    const update = {
+      $set: {
+        title: req.body.title,
+        location: req.body.location,
+        duration: req.body.duration,
+        stipend: req.body.stipend,
+        description: req.body.description,
+        requirements: req.body.requirements // array
+      }
+    };
+
+    const result = await db.collection('Internships').updateOne({ _id: internshipId }, update);
+    res.status(200).json({ success: true, updated: result.modifiedCount > 0 });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update internship' });
+  }
+});
+
+app.delete('/api/internships/:id', authMiddleware, async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const internshipId = new ObjectId(req.params.id);
+
+    const result = await db.collection('Internships').deleteOne({ _id: internshipId });
+    res.status(200).json({ success: true, deleted: result.deletedCount > 0 });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete internship' });
+  }
+});
+
+
+
+
 
 // Start the server
 app.listen(port, () => {
