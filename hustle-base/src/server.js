@@ -1010,8 +1010,12 @@ app.get('/api/employers/:id/internships', authMiddleware, async (req, res) => {
 app.post('/api/create/internships', authMiddleware, async (req, res) => {
   try {
     const db = await connectToDb();
-    const userId = new ObjectId(req.user.id); // from token
+    console.log('req.user:', req.user);
+    const userId = new ObjectId(req.user._id);// from token
     const employer = await db.collection('Employer').findOne({ userID: userId });
+    console.log('userId as ObjectId:', userId);
+console.log('Looking for Employer with userID:', userId.toHexString());
+
 
     if (!employer) {
       return res.status(404).json({ success: false, message: 'Employer not found' });
@@ -1025,7 +1029,7 @@ app.post('/api/create/internships', authMiddleware, async (req, res) => {
       stipend: req.body.stipend,
       description: req.body.description,
       requirements: req.body.requirements,
-      employerId: employer._id,
+      employerId: userId,
       employerEmail: employer.email,
       verified: employer.verified,
       type: req.body.type,
