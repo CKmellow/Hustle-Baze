@@ -1043,6 +1043,51 @@ app.get('/api/internships', async (req, res) => {
     res.status(500).json({ message: "Server error fetching internships" });
   }
 });
+//  career dashboard stats
+app.get('/api/dashboard-stats', async (req, res) => {
+  try {
+    const db = await connectToDb();
+
+    const verifiedOrgsCount = await db.collection('Employer').countDocuments({ verified: true });
+    const rejectedOrgsCount = await db.collection('Employer').countDocuments({ verified: false });
+    const internshipsCount = await db.collection('Internships').countDocuments({}); // or add filters if needed
+    const applicationsCount = await db.collection('Applications').countDocuments({}); // assuming this collection exists
+
+    res.json({
+      verifiedOrgs: verifiedOrgsCount,
+      rejectedOrgs: rejectedOrgsCount,
+      internships: internshipsCount,
+      applications: applicationsCount,
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ message: 'Failed to fetch dashboard stats' });
+  }
+});
+// for the alert section
+app.get('/api/alerts', async (req, res) => {
+  try {
+    const db = await connectToDb();
+
+    const unverified = await db.collection("Employer")
+      .find({ verified: false }) // no sort
+      .limit(5)
+      .toArray();
+
+    const alerts = unverified.map(org => ({
+      type: "organization",
+      message: `New organization "${org.company}" pending verification`,
+      timestamp: org.createdAt || new Date()
+    }));
+
+    res.json(alerts);
+  } catch (err) {
+    console.error("Error fetching alerts:", err);
+    res.status(500).json({ message: "Server error fetching alerts" });
+  }
+});
+
+
 
 // ⚠️ Un-comment the line below ONLY when you want to insert the career officer
 //  insertCareerOfficerManually();
