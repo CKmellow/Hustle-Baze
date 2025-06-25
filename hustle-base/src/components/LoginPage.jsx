@@ -72,6 +72,12 @@ const [signupData, setSignupData] = useState({
       console.log('token:', data.token);
       console.log('user:', data.user);
 
+      const redirectTo = localStorage.getItem('redirectAfterLogin');
+if (redirectTo) {
+  localStorage.removeItem('redirectAfterLogin');
+  navigate(redirectTo);
+  return;
+}
   
       // Redirect based on role
       if (data.user.role === 'student') {
