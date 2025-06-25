@@ -1086,7 +1086,55 @@ app.get('/api/alerts', async (req, res) => {
     res.status(500).json({ message: "Server error fetching alerts" });
   }
 });
+//forgot password
+app.post('/api/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  const user = await db.collection('Users').findOne({ email });
+  if (!user) return res.status(404).json({ message: "Email not found" });
 
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+  await db.collection('PasswordResets').insertOne({
+    userId: user._id,
+    token,
+    expiresAt: expiry
+  });
+
+  const resetLink = `http://localhost:3000/reset-password/${token}`;
+  // Send using nodemailer or Mailtrap
+  await sendEmail(user.email, "Reset Your Password", `Click to reset: ${resetLink}`);
+
+  res.json({ message: "Reset link sent" });
+});
+// Reset password endpoint
+app.post('/api/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const db = await connectToDb();
+    const resetEntry = await db.collection('PasswordResets').findOne({ token });
+
+    if (!resetEntry || resetEntry.expiresAt < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await db.collection('users').updateOne(
+      { _id: new ObjectId(resetEntry.userId) },
+      { $set: { password: hashedPassword } }
+    );
+
+    await db.collection('PasswordResets').deleteOne({ token });
+console.log("Password reset successful for token:", token);
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Reset error:', err);
+    res.status(500).json({ message: 'Server error resetting password' });
+  }
+});
 
 
 // ⚠️ Un-comment the line below ONLY when you want to insert the career officer

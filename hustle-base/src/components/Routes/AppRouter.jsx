@@ -12,6 +12,9 @@ import ViewAnalytics from '../Uni-View/ViewAnalytics';
 import AnalyticsLayout from '../Uni-View/AnalyticsLayout';
 import VerifyOrgLayout from '../Uni-View/VerifyOrgLayout';
 import CareerOfficerProfileLayout from '../Uni-View/CareerOfficerProfileLayout';
+import ForgotPassword from '../ForgotPassword';
+import ResetPassword from '../ResetPassword';
+
 
 <Route path="/verify-email" element={<VerifyEmail />} />
 
@@ -65,6 +68,8 @@ const AppRouter = () => {
             path="/career-dashboard"
             element={<ProtectedRoute element={<UniLayout />} />}
           />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route path="/students/profile/:id" element={<StudentProfile />} />
         </Routes>
