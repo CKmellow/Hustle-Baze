@@ -14,6 +14,8 @@ import VerifyOrgLayout from '../Uni-View/VerifyOrgLayout';
 import CareerOfficerProfileLayout from '../Uni-View/CareerOfficerProfileLayout';
 import ForgotPassword from '../ForgotPassword';
 import ResetPassword from '../ResetPassword';
+import AvailableInternships from '../AvailableInternships'; // adjust path if needed
+
 
 
 <Route path="/verify-email" element={<VerifyEmail />} />
@@ -61,7 +63,9 @@ const AppRouter = () => {
             element={<ProtectedRoute element={<StudentLayout />} />}
           />
           <Route path="/analytics" element={<ViewAnalytics />} />
+          
           <Route path="/career-profile" element={<CareerOfficerProfileLayout />} />
+          <Route path="/internships" element={<AvailableInternships />} />
           <Route path="/verify-organizations" element={<VerifyOrgLayout />} />
           <Route path="/analytics-dashboard" element={<AnalyticsLayout />} />
           <Route

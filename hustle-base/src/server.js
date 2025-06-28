@@ -1364,6 +1364,17 @@ app.get('/api/dashboard-stats', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch dashboard stats' });
   }
 });
+// GET /api/analytics/user-roles
+app.get('/api/analytics/user-roles', authMiddleware, async (req, res) => {
+  const db = await connectToDb();
+
+  const userCounts = await db.collection('users').aggregate([
+    { $group: { _id: '$role', count: { $sum: 1 } } }
+  ]).toArray();
+
+  res.json({ success: true, data: userCounts });
+});
+
 // for the alert section
 app.get('/api/alerts', async (req, res) => {
   try {

@@ -24,7 +24,8 @@ const Topbar = ({ setActivePage, toggleSidebar, sidebarCollapsed }) => {
   return (
     <header className="topbar">
      
-      <div className="logo">Hustle Base</div>
+      <a href="/home" className="logo">Hustle Base</a>
+
 
       <div className="topbar-icons">
         <button className="icon-button" aria-label="Notifications">
