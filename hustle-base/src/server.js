@@ -1076,52 +1076,6 @@ app.delete('/api/internships/:id', authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to delete internship' });
   }
 });
-
-
-
-
-
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
-
-
-
-async function insertCareerOfficerManually() {
-  const { ObjectId } = require('mongodb');
-  // const bcrypt = require('bcrypt');
-  const db = await connectToDb();
-
-  const staffUserId = new ObjectId();
-  const hashedPassword = await bcrypt.hash("123", 10); // change as needed
-
-  // Insert into Users collection
-  await db.collection('users').insertOne({
-    _id: staffUserId,
-    fname: "cyp",
-    lname: "cyp",
-    email: "cyprian.kamau@strathmore.edu",
-    password: hashedPassword,
-    role: "careerOfficer",
-    verified: true,
-    createdAt: new Date()
-  });
-
-  // Insert into CareerOffice collection
-  await db.collection('careerOffice').insertOne({
-    StaffID: "CO001",
-    userID: staffUserId,
-    Name: "Paul Macharia",
-    OrgName: "Strathmore University",
-    Phone: "0712345678",
-    Email: "pmacharia@strathmore.edu",
-    description: "Handles all student internship verification."
-  });
-
-  console.log("✅ Career Officer added successfully.");
-  process.exit(); // stop server after insert
-}
 // view analytics
 app.get('/api/applications/analytics', async (req, res) => {
   try {
@@ -1164,10 +1118,10 @@ app.get('/api/employers', async (req, res) => {
 });
 // career officer's profile
 app.get('/api/career-office/:staffId', async (req, res) => {
-  const { staffId } = req.params;
+  const { userId } = req.params;
   try {
     const db = await connectToDb();
-    const officer = await db.collection('careerOffice').findOne({ StaffId: staffId });
+    const officer = await db.collection('careerOffice').findOne({ userID: userId });
 
     if (!officer) return res.status(404).json({ message: 'Officer not found' });
 
@@ -1281,47 +1235,6 @@ app.put('/api/career-office/:staffId', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-// fixing some issues with the Internships schema
-// async function linkInternshipsToEmployers() {
-//   try {
-//     const db = await connectToDb();
-//     const internshipCollection = db.collection("Internships");
-//     const employerCollection = db.collection("Employer");
-
-//     const internships = await internshipCollection.find().toArray();
-
-//     for (const internship of internships) {
-//       const employerEmail = internship.employerEmail;
-
-//       if (!employerEmail) {
-//         console.warn(`⚠️ Skipping internship ${internship._id}: No employerEmail found.`);
-//         continue;
-//       }
-
-//       const employer = await employerCollection.findOne({ email: employerEmail });
-
-//       if (!employer) {
-//         console.warn(`❌ No employer found for internship email: ${employerEmail}`);
-//         continue;
-//       }
-
-//       const updateResult = await internshipCollection.updateOne(
-//         { _id: internship._id },
-//         { $set: { employerId: employer._id } }
-//       );
-
-//       console.log(`✅ Linked internship ${internship._id} to employer ${employer._id}`);
-//     }
-
-//     console.log("🎉 Linking complete.");
-//   } catch (error) {
-//     console.error("❌ Error linking internships to employers:", error);
-//   }
-// }
-
-// linkInternshipsToEmployers();
-
-// GET internships with employer data
 app.get('/api/internships', async (req, res) => {
   try {
     const db = await connectToDb();
@@ -1345,6 +1258,91 @@ app.get('/api/internships', async (req, res) => {
     res.status(500).json({ message: "Server error fetching internships" });
   }
 });
+//update admin profile
+app.get('/api/career-officers/by-user/:userId', authMiddleware, async (req, res) => {
+  const userId = req.params.userId;
+  if (!ObjectId.isValid(userId)) {
+    return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+  }
+
+  const db = await connectToDb();
+  const officer = await db.collection('careerOffice').findOne({ userID: new ObjectId(userId) });
+  const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+
+  if (!officer || !user) {
+    return res.status(404).json({ success: false, message: 'Career officer or user not found' });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...officer,
+      fname: user.fname,
+      lname: user.lname,
+      email: user.email
+    }
+  });
+});
+
+
+  // PUT update career officer profile (excluding email)
+ app.put('/api/career-officers/:id', authMiddleware, async (req, res) => {
+  const officerId = req.params.id;
+  if (!ObjectId.isValid(officerId)) {
+    return res.status(400).json({ success: false, message: 'Invalid officer ID' });
+  }
+
+  const {
+    fname,
+    lname,
+    OrgName,
+    Phone,
+    description
+  } = req.body;
+
+  if (!OrgName) {
+    return res.status(400).json({
+      success: false,
+      message: 'Organization Name is required',
+      missingFields: { required: ['OrgName'] }
+    });
+  }
+
+  const db = await connectToDb();
+
+  const officer = await db.collection('careerOffice').findOne({ _id: new ObjectId(officerId) });
+  if (!officer) {
+    return res.status(404).json({ success: false, message: 'Career officer not found' });
+  }
+
+  // Update career officer collection
+  await db.collection('careerOffice').updateOne(
+    { _id: new ObjectId(officerId) },
+    {
+      $set: {
+        OrgName,
+        Phone,
+        description,
+        updatedAt: new Date()
+      }
+    }
+  );
+
+  // Update the user's fname and lname only
+  await db.collection('users').updateOne(
+    { _id: officer.userID },
+    {
+      $set: {
+        fname,
+        lname
+      }
+    }
+  );
+
+  res.json({ success: true, message: 'Career officer profile updated successfully' });
+});
+
+
 //  career dashboard stats
 app.get('/api/dashboard-stats', async (req, res) => {
   try {
@@ -1437,6 +1435,96 @@ console.log("Password reset successful for token:", token);
     res.status(500).json({ message: 'Server error resetting password' });
   }
 });
+
+
+
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
+
+
+
+async function insertCareerOfficerManually() {
+  const { ObjectId } = require('mongodb');
+  // const bcrypt = require('bcrypt');
+  const db = await connectToDb();
+
+  const staffUserId = new ObjectId();
+  const hashedPassword = await bcrypt.hash("123", 10); // change as needed
+
+  // Insert into Users collection
+  await db.collection('users').insertOne({
+    _id: staffUserId,
+    fname: "cyp",
+    lname: "cyp",
+    email: "cyprian.kamau@strathmore.edu",
+    password: hashedPassword,
+    role: "careerOfficer",
+    verified: true,
+    createdAt: new Date()
+  });
+
+  // Insert into CareerOffice collection
+  await db.collection('careerOffice').insertOne({
+    StaffID: "CO001",
+    userID: staffUserId,
+    Name: "Paul Macharia",
+    OrgName: "Strathmore University",
+    Phone: "0712345678",
+    Email: "pmacharia@strathmore.edu",
+    description: "Handles all student internship verification."
+  });
+
+  console.log("✅ Career Officer added successfully.");
+  process.exit(); // stop server after insert
+}
+// view analytics
+
+
+
+// fixing some issues with the Internships schema
+// async function linkInternshipsToEmployers() {
+//   try {
+//     const db = await connectToDb();
+//     const internshipCollection = db.collection("Internships");
+//     const employerCollection = db.collection("Employer");
+
+//     const internships = await internshipCollection.find().toArray();
+
+//     for (const internship of internships) {
+//       const employerEmail = internship.employerEmail;
+
+//       if (!employerEmail) {
+//         console.warn(`⚠️ Skipping internship ${internship._id}: No employerEmail found.`);
+//         continue;
+//       }
+
+//       const employer = await employerCollection.findOne({ email: employerEmail });
+
+//       if (!employer) {
+//         console.warn(`❌ No employer found for internship email: ${employerEmail}`);
+//         continue;
+//       }
+
+//       const updateResult = await internshipCollection.updateOne(
+//         { _id: internship._id },
+//         { $set: { employerId: employer._id } }
+//       );
+
+//       console.log(`✅ Linked internship ${internship._id} to employer ${employer._id}`);
+//     }
+
+//     console.log("🎉 Linking complete.");
+//   } catch (error) {
+//     console.error("❌ Error linking internships to employers:", error);
+//   }
+// }
+
+// linkInternshipsToEmployers();
+
+// GET internships with employer data
 
 
 // ⚠️ Un-comment the line below ONLY when you want to insert the career officer
