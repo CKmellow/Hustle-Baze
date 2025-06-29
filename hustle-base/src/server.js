@@ -1447,6 +1447,64 @@ console.log("Password reset successful for token:", token);
   }
 });
 
+// Add a comment for a specific internship
+app.post('/api/comments', async (req, res) => {
+  const { internshipId, studentId, comment, rating } = req.body;
+
+  if (!internshipId || !studentId || !comment) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    // Optionally: Check if the student has already commented
+    const existing = await commentsCollection.findOne({ internshipId, studentId });
+
+    if (existing) {
+      return res.status(400).json({ error: 'You have already commented on this internship.' });
+    }
+
+    const newComment = {
+      internshipId,
+      studentId,
+      comment,
+      rating: rating || null,
+      createdAt: new Date(),
+    };
+
+    const result = await commentsCollection.insertOne(newComment);
+    res.status(201).json({ success: true, commentId: result.insertedId });
+  } catch (err) {
+    console.error('Comment insert error:', err);
+    res.status(500).json({ error: 'Server error adding comment' });
+  }
+});
+
+// Update an existing comment
+app.put('/api/comments/:commentId', async (req, res) => {
+  const { comment, rating } = req.body;
+
+  try {
+    const result = await commentsCollection.updateOne(
+      { _id: new ObjectId(req.params.commentId) },
+      {
+        $set: {
+          comment,
+          rating,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: 'Comment not found or not changed' });
+    }
+  } catch (err) {
+    console.error('Update error:', err);
+    res.status(500).json({ error: 'Server error updating comment' });
+  }
+});
 
 
 
