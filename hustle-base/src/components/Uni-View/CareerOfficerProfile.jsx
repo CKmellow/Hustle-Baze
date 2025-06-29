@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import './CareerOfficerProfile.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faBuilding, faPhone, faEnvelope, faCommentDots, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 const CareerOfficerProfile = () => {
   const [formData, setFormData] = useState({
@@ -7,7 +10,7 @@ const CareerOfficerProfile = () => {
     Phone: '',
     Email: '',
     description: '',
-    _id: '', // Add _id to track officer ID for update
+    _id: '',
   });
 
   const [message, setMessage] = useState('');
@@ -21,14 +24,14 @@ const CareerOfficerProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem('token'); // ✅ Get the token
+    const token = localStorage.getItem('token');
 
     try {
       const response = await fetch(`http://localhost:5000/api/career-officers/${formData._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // ✅ Send token
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData),
       });
@@ -72,68 +75,43 @@ const CareerOfficerProfile = () => {
   }, [userId]);
 
   return (
-    <div className="profile-page" style={styles.container}>
-      <h2 style={styles.heading}>👤 Career Officer Profile</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input type="text" name="Name" value={formData.Name} onChange={handleChange} placeholder="Full Name" required style={styles.input} />
-        <input type="text" name="OrgName" value={formData.OrgName} onChange={handleChange} placeholder="Organization Name" required style={styles.input} />
-        <input type="text" name="Phone" value={formData.Phone} onChange={handleChange} placeholder="Phone Number" style={styles.input} />
-        <input type="email" name="Email" value={formData.Email} disabled placeholder="Email (locked)" style={{ ...styles.input, backgroundColor: '#eee' }} />
-        <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" rows={4} style={styles.textarea}></textarea>
-        <button type="submit" style={styles.button}>Update Profile</button>
-        {message && <p style={styles.message}>{message}</p>}
+    <div className="profile-page">
+      <h2 className="profile-title"><FontAwesomeIcon icon={faUser} /> Career Officer Profile</h2>
+      <form onSubmit={handleSubmit} className="profile-form">
+        
+        <div className="input-group">
+          <FontAwesomeIcon icon={faUser} className="input-icon" />
+          <input type="text" name="Name" value={formData.Name} onChange={handleChange} placeholder="Full Name" required />
+        </div>
+
+        <div className="input-group">
+          <FontAwesomeIcon icon={faBuilding} className="input-icon" />
+          <input type="text" name="OrgName" value={formData.OrgName} onChange={handleChange} placeholder="Organization Name" required />
+        </div>
+
+        <div className="input-group">
+          <FontAwesomeIcon icon={faPhone} className="input-icon" />
+          <input type="text" name="Phone" value={formData.Phone} onChange={handleChange} placeholder="Phone Number" />
+        </div>
+
+        <div className="input-group">
+          <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+          <input type="email" name="Email" value={formData.Email} disabled placeholder="Email (locked)" />
+        </div>
+
+        <div className="input-group">
+          <FontAwesomeIcon icon={faCommentDots} className="input-icon" />
+          <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" rows={4}></textarea>
+        </div>
+
+        <button type="submit" className="submit-button">
+          <FontAwesomeIcon icon={faPaperPlane} /> Update Profile
+        </button>
+
+        {message && <p className="form-message">{message}</p>}
       </form>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: '2rem',
-    background: '#f8f9fa',
-    minHeight: '100vh',
-    fontFamily: 'Arial, sans-serif'
-  },
-  heading: {
-    color: '#343a40',
-    marginBottom: '1rem'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    maxWidth: '500px',
-    backgroundColor: '#fff',
-    padding: '2rem',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-  },
-  input: {
-    padding: '10px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: '16px'
-  },
-  textarea: {
-    padding: '10px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: '16px'
-  },
-  button: {
-    backgroundColor: '#560BAD',
-    color: 'white',
-    padding: '12px',
-    fontSize: '16px',
-    borderRadius: '6px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease'
-  },
-  message: {
-    color: 'green',
-    fontWeight: 'bold'
-  }
 };
 
 export default CareerOfficerProfile;
