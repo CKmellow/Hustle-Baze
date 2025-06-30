@@ -24,43 +24,40 @@ const EmployerDash = ({ setActivePage }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-const fetchDashboardData = useCallback(async () => {
-  if (!employerID) {
-    setError("No employer ID found. Please log in again.");
-    setLoading(false);
-    return;
-  }
+  const fetchDashboardData = useCallback(async () => {
+    if (!employerID) {
+      setError("No employer ID found. Please log in again.");
+      setLoading(false);
+      return;
+    }
 
-  try {
-    setLoading(true);
-    setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-    const [countsResponse, completionResponse] = await Promise.all([
-      axios.get(`http://localhost:5000/api/employers/${employerID}/application-status-counts`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      }).catch(() => ({ data: { applicationCounts: { pending: 0, accepted: 0, rejected: 0 } } })),
+      const [statusRes, profileRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/employers/${employerID}/application-status-counts`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }),
+        axios.get(`http://localhost:5000/api/employers/${employerID}/completion`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+      ]);
 
-      axios.get(`http://localhost:5000/api/employers/${employerID}/completion`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      }).catch(() => ({ data: { success: false, profileCompletion: 0, missingFields: { required: [], optional: [] } } }))
-    ]);
-
-    setDashboardData({
-      internshipCount: completionResponse.data.internshipCount || 0,
-      profileCompletion: completionResponse.data.profileCompletion || 0,
-      missingFields: completionResponse.data.missingFields || { required: [], optional: [] },
-      applicationCounts: countsResponse.data.applicationCounts || { pending: 0, accepted: 0, rejected: 0 },
-      lastUpdated: completionResponse.data.lastUpdated || null
-    });
-
-  } catch (err) {
-    console.error("Dashboard error:", err);
-    setError("Failed to load dashboard data. Please try again later.");
-  } finally {
-    setLoading(false);
-  }
-}, [employerID]);
-
+      setDashboardData({
+        internshipCount: statusRes.data.internshipCount || 0,
+        applicationCounts: statusRes.data.applicationCounts || { pending: 0, accepted: 0, rejected: 0 },
+        profileCompletion: profileRes.data.profileCompletion || 0,
+        missingFields: profileRes.data.missingFields || { required: [], optional: [] },
+        lastUpdated: profileRes.data.lastUpdated || null
+      });
+    } catch (err) {
+      console.error("Dashboard error:", err);
+      setError("Failed to load dashboard data. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }, [employerID]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -105,9 +102,9 @@ const fetchDashboardData = useCallback(async () => {
         <h3>Profile Completeness</h3>
         <div className="progress-container">
           <div className="progress-bar-background">
-            <div 
+            <div
               className="progress-bar-fill"
-              style={{ 
+              style={{
                 width: `${dashboardData.profileCompletion}%`,
                 backgroundColor: getCompletionColor(dashboardData.profileCompletion)
               }}
@@ -118,19 +115,19 @@ const fetchDashboardData = useCallback(async () => {
           {dashboardData.profileCompletion}% complete
           {dashboardData.profileCompletion < 100 && (
             <span className="completion-hint">
-              {dashboardData.missingFields.required.length > 0 ? 
-                ' Complete required fields' : 
-                ' Add optional details to improve your profile'}
+              {dashboardData.missingFields.required.length > 0
+                ? ' Complete required fields'
+                : ' Add optional details to improve your profile'}
             </span>
           )}
         </p>
-        <button 
+        <button
           className="update-profile-btn"
           onClick={handleUpdateProfile}
         >
-          {dashboardData.profileCompletion < 100 ? 
-            'Complete Profile' : 
-            'Update Profile'}
+          {dashboardData.profileCompletion < 100
+            ? 'Complete Profile'
+            : 'Update Profile'}
         </button>
       </div>
 

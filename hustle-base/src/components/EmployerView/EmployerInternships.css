@@ -121,6 +121,23 @@ form textarea {
   resize: vertical;
 }
 
+.view-applications-btn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.view-applications-btn:hover {
+  background-color: #059669;
+}
+
+
 /* Submit Button */
 form .create-button {
   background-color: #1e90ff;
@@ -169,4 +186,94 @@ form select {
   align-items: center;
   justify-content: center;
   z-index: 10;
+}
+.view-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.view-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.internship-modal-overlay {
+  z-index: 40; /* Should be BELOW the HeadlessUI Dialog (z-50) */
+}
+
+/* ===== Applications Modal ===== */
+
+.applications-modal-panel {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 96%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 50;
+  border: 2px dashed red;
+}
+
+.applications-modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.applications-modal-table th,
+.applications-modal-table td {
+  border: 1px solid #ddd;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+}
+
+.applications-modal-table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.applications-modal-table td {
+  color: #374151;
+}
+
+.applications-modal-table input,
+.applications-modal-table select {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.download-all-btn {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.download-all-btn:hover {
+  background-color: #1e40af;
+}
+
+.close-btn {
+  background-color: #6b7280;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
 }

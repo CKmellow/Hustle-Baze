@@ -1,28 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import EmployerSidebar from './EmployerSidebar';
 import EmployerDash from './EmployerDash';
 import Topbar from '../studview/Topbar';
 import EmployerProfile from './EmployerProfile';
-//import EmployerApplications from './EmployerApplications';
-//import EmployerInternships from './EmployerInternships';
 import './EmployerLayout.css';
 import EmployerInternships from './EmployerInternships';
+import EmployerApplicationsPage from './EmployerApplicationsPage';
 
 const EmployerLayout = () => {
   const [activePage, setActivePage] = useState("Dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  useEffect(() => {
+    const handleAppPage = () => {
+      setActivePage("applications");
+    };
+    window.addEventListener("openApplicationsPage", handleAppPage);
+    return () => window.removeEventListener("openApplicationsPage", handleAppPage);
+  }, []);
+
   const renderPage = () => {
     switch (activePage) {
       case "Dashboard":
         return <EmployerDash setActivePage={setActivePage} />;
-    //   case "Applications":
-    //     return <EmployerApplications setActivePage={setActivePage} />;
       case "Internships":
         return <EmployerInternships setActivePage={setActivePage} />;
       case "Profile":
-          return <EmployerProfile setActivePage={setActivePage} />;
-
+        return <EmployerProfile setActivePage={setActivePage} />;
+      case "applications":
+        return <EmployerApplicationsPage setActivePage={setActivePage} />;
       case "Logout":
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -54,7 +60,6 @@ const EmployerLayout = () => {
 
         <main className="employer-main">
           {renderPage()}
-          
         </main>
       </div>
     </div>

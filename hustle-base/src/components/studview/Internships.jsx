@@ -46,9 +46,9 @@ const Internships = ({setActivePage}) => {
     setActivePage('ApplicationForm');
   };
 
-  // const handleApply = (internshipId) => {
-  //   navigate(`/apply/${internshipId}`);
-  // };
+  const handleApply = (internshipId) => {
+    navigate(`/apply/${internshipId}`);
+  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

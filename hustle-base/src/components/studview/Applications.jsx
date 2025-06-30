@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Eye, Trash2 } from 'lucide-react'; // icons
 import './Applications.css';
 
 const Applications = ({ setActivePage }) => {
@@ -102,36 +103,30 @@ const Applications = ({ setActivePage }) => {
       </div>
 
       <div className="filters-container">
-        <div className="search-filter">
-          <input
-            type="text"
-            placeholder="Search by title or company"
-            value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Search by title or company"
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+        />
 
-        <div className="status-filter">
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          >
-            <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="accepted">Accepted</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+        >
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
 
-        <div className="sort-filter">
-          <select
-            value={filters.sortBy}
-            onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
-        </div>
+        <select
+          value={filters.sortBy}
+          onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
+        >
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
       </div>
 
       <div className="applications-grid">
@@ -151,47 +146,26 @@ const Applications = ({ setActivePage }) => {
                 <p>{new Date(application.createdAt).toLocaleDateString()}</p>
               </div>
 
-              <div>
-                <p>{application.internship?.company || 'N/A'}</p>
-              </div>
+              <div>{application.internship?.company || 'N/A'}</div>
 
               <div className="documents-column">
-                <div className="document-upload">
-                  <label>
-                    Cover Letter
-                    {application.coverLetter && (
-                      <button
-                        onClick={() => downloadDocument(application.coverLetter)}
-                        className="download-btn"
-                      >
-                        View
-                      </button>
-                    )}
-                  </label>
-                </div>
-
-                <div className="document-upload">
-                  <label>
-                    CV
-                    {application.cv && (
-                      <button
-                        onClick={() => downloadDocument(application.cv)}
-                        className="download-btn"
-                      >
-                        View
-                      </button>
-                    )}
-                  </label>
-                </div>
+                {application.coverLetter && (
+                  <button onClick={() => downloadDocument(application.coverLetter)} title="View Cover Letter" className="icon-button">
+                    <Eye size={16} /> <span>Cover</span>
+                  </button>
+                )}
+                {application.cv && (
+                  <button onClick={() => downloadDocument(application.cv)} title="View CV" className="icon-button">
+                    <Eye size={16} /> <span>CV</span>
+                  </button>
+                )}
               </div>
 
-              <div>
-                {getStatusBadge(application.status || 'pending')}
-              </div>
+              <div>{getStatusBadge(application.status || 'pending')}</div>
 
               <div className="actions-column">
-                <button onClick={() => handleDelete(application._id)} className="delete-btn">
-                  Delete
+                <button onClick={() => handleDelete(application._id)} className="icon-button delete-btn" title="Delete">
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>

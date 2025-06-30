@@ -25,7 +25,7 @@
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .new-application-btn:hover {
@@ -39,9 +39,8 @@
   margin-bottom: 2rem;
 }
 
-.search-filter input,
-.status-filter select,
-.sort-filter select {
+.filters-container input,
+.filters-container select {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #e2e8f0;
@@ -55,25 +54,33 @@
   gap: 1rem;
 }
 
-.grid-header {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  padding: 1rem;
-  background-color: #f7fafc;
-  font-weight: 600;
-  border-bottom: 2px solid #e2e8f0;
-}
-
+.grid-header,
 .application-row {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  padding: 1rem;
   align-items: center;
+  gap: 1rem;
+}
+
+.grid-header {
+  padding: 1rem;
+  background-color: #f7fafc;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.application-row {
+  padding: 1rem;
   border: 1px solid #edf2f7;
   border-radius: 8px;
-  margin-bottom: 1rem;
+  background-color: #fff;
+  transition: box-shadow 0.2s ease;
+}
+
+.application-row:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .documents-column {
@@ -82,49 +89,35 @@
   gap: 0.5rem;
 }
 
-.document-upload label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.875rem;
-  color: #4a5568;
-}
-
-.document-upload input[type="file"] {
-  font-size: 0.875rem;
-}
-
-.download-btn {
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   background: none;
   border: none;
   color: #4f46e5;
-  text-decoration: underline;
   cursor: pointer;
-  padding: 0;
   font-size: 0.875rem;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.icon-button:hover {
+  color: #4338ca;
 }
 
 .actions-column {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
 }
 
-.edit-btn, .delete-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.edit-btn {
-  background-color: #e2e8f0;
-  border: 1px solid #cbd5e0;
-}
-
 .delete-btn {
-  background-color: #fee2e2;
-  border: 1px solid #fecaca;
   color: #dc2626;
+}
+
+.delete-btn:hover {
+  color: #991b1b;
 }
 
 .no-applications {
