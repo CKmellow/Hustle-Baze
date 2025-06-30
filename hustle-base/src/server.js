@@ -1119,6 +1119,7 @@ app.delete('/api/internships/:id', authMiddleware, async (req, res) => {
   }
 });
 
+
 // GET /api/internships/:id/applications
 // app.get('/api/internships/:id/applications', authMiddleware, async (req, res) => {
 //   const { ObjectId } = require('mongodb');
@@ -1353,6 +1354,7 @@ async function insertCareerOfficerManually() {
   console.log("✅ Career Officer added successfully.");
   process.exit(); // stop server after insert
 }
+
 // view analytics
 app.get('/api/applications/analytics', async (req, res) => {
   try {
@@ -1395,10 +1397,10 @@ app.get('/api/employers', async (req, res) => {
 });
 // career officer's profile
 app.get('/api/career-office/:staffId', async (req, res) => {
-  const { staffId } = req.params;
+  const { userId } = req.params;
   try {
     const db = await connectToDb();
-    const officer = await db.collection('careerOffice').findOne({ StaffId: staffId });
+    const officer = await db.collection('careerOffice').findOne({ userID: userId });
 
     if (!officer) return res.status(404).json({ message: 'Officer not found' });
 
@@ -1512,6 +1514,324 @@ app.put('/api/career-office/:staffId', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+app.get('/api/internships', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const internships = await db.collection("Internships").aggregate([
+      {
+        $lookup: {
+          from: "Employer",
+          localField: "employerId",
+          foreignField: "_id",
+          as: "employer"
+        }
+      },
+      { $unwind: "$employer" }, // Flatten employer array
+      { $match: { "employer.verified": true } }, // Show only verified
+      { $sort: { postedAt: -1 } } // Optional: newest first
+    ]).toArray();
+
+    res.json(internships);
+  } catch (err) {
+    console.error("Error fetching internships:", err);
+    res.status(500).json({ message: "Server error fetching internships" });
+  }
+});
+//update admin profile
+app.get('/api/career-officers/by-user/:userId', authMiddleware, async (req, res) => {
+  const userId = req.params.userId;
+  if (!ObjectId.isValid(userId)) {
+    return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+  }
+
+  const db = await connectToDb();
+  const officer = await db.collection('careerOffice').findOne({ userID: new ObjectId(userId) });
+  const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+
+  if (!officer || !user) {
+    return res.status(404).json({ success: false, message: 'Career officer or user not found' });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...officer,
+      fname: user.fname,
+      lname: user.lname,
+      email: user.email
+    }
+  });
+});
+
+
+  // PUT update career officer profile (excluding email)
+ app.put('/api/career-officers/:id', authMiddleware, async (req, res) => {
+  const officerId = req.params.id;
+  if (!ObjectId.isValid(officerId)) {
+    return res.status(400).json({ success: false, message: 'Invalid officer ID' });
+  }
+
+  const {
+    fname,
+    lname,
+    OrgName,
+    Phone,
+    description
+  } = req.body;
+
+  if (!OrgName) {
+    return res.status(400).json({
+      success: false,
+      message: 'Organization Name is required',
+      missingFields: { required: ['OrgName'] }
+    });
+  }
+
+  const db = await connectToDb();
+
+  const officer = await db.collection('careerOffice').findOne({ _id: new ObjectId(officerId) });
+  if (!officer) {
+    return res.status(404).json({ success: false, message: 'Career officer not found' });
+  }
+
+  // Update career officer collection
+  await db.collection('careerOffice').updateOne(
+    { _id: new ObjectId(officerId) },
+    {
+      $set: {
+        OrgName,
+        Phone,
+        description,
+        updatedAt: new Date()
+      }
+    }
+  );
+
+  // Update the user's fname and lname only
+  await db.collection('users').updateOne(
+    { _id: officer.userID },
+    {
+      $set: {
+        fname,
+        lname
+      }
+    }
+  );
+
+  res.json({ success: true, message: 'Career officer profile updated successfully' });
+});
+
+
+//  career dashboard stats
+app.get('/api/dashboard-stats', async (req, res) => {
+  try {
+    const db = await connectToDb();
+
+    const verifiedOrgsCount = await db.collection('Employer').countDocuments({ verified: true });
+    const rejectedOrgsCount = await db.collection('Employer').countDocuments({ verified: false });
+    const internshipsCount = await db.collection('Internships').countDocuments({}); // or add filters if needed
+    const applicationsCount = await db.collection('Applications').countDocuments({}); // assuming this collection exists
+
+    res.json({
+      verifiedOrgs: verifiedOrgsCount,
+      rejectedOrgs: rejectedOrgsCount,
+      internships: internshipsCount,
+      applications: applicationsCount,
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ message: 'Failed to fetch dashboard stats' });
+  }
+});
+// GET /api/analytics/user-roles
+app.get('/api/analytics/user-roles', authMiddleware, async (req, res) => {
+  const db = await connectToDb();
+
+  const userCounts = await db.collection('users').aggregate([
+    { $group: { _id: '$role', count: { $sum: 1 } } }
+  ]).toArray();
+
+  res.json({ success: true, data: userCounts });
+});
+
+// for the alert section
+app.get('/api/alerts', async (req, res) => {
+  try {
+    const db = await connectToDb();
+
+    const unverified = await db.collection("Employer")
+      .find({ verified: false }) // no sort
+      .limit(5)
+      .toArray();
+
+    const alerts = unverified.map(org => ({
+      type: "organization",
+      message: `New organization "${org.company}" pending verification`,
+      timestamp: org.createdAt || new Date()
+    }));
+
+    res.json(alerts);
+  } catch (err) {
+    console.error("Error fetching alerts:", err);
+    res.status(500).json({ message: "Server error fetching alerts" });
+  }
+});
+//forgot password
+app.post('/api/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  const user = await db.collection('Users').findOne({ email });
+  if (!user) return res.status(404).json({ message: "Email not found" });
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+  await db.collection('PasswordResets').insertOne({
+    userId: user._id,
+    token,
+    expiresAt: expiry
+  });
+
+  const resetLink = `http://localhost:3000/reset-password/${token}`;
+  // Send using nodemailer or Mailtrap
+  await sendEmail(user.email, "Reset Your Password", `Click to reset: ${resetLink}`);
+
+  res.json({ message: "Reset link sent" });
+});
+// Reset password endpoint
+app.post('/api/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const db = await connectToDb();
+    const resetEntry = await db.collection('PasswordResets').findOne({ token });
+
+    if (!resetEntry || resetEntry.expiresAt < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await db.collection('users').updateOne(
+      { _id: new ObjectId(resetEntry.userId) },
+      { $set: { password: hashedPassword } }
+    );
+
+    await db.collection('PasswordResets').deleteOne({ token });
+console.log("Password reset successful for token:", token);
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Reset error:', err);
+    res.status(500).json({ message: 'Server error resetting password' });
+  }
+});
+
+// Add a comment for a specific internship
+app.post('/api/comments', async (req, res) => {
+  const { internshipId, studentId, comment, rating } = req.body;
+
+  if (!internshipId || !studentId || !comment) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    // Optionally: Check if the student has already commented
+    const existing = await commentsCollection.findOne({ internshipId, studentId });
+
+    if (existing) {
+      return res.status(400).json({ error: 'You have already commented on this internship.' });
+    }
+
+    const newComment = {
+      internshipId,
+      studentId,
+      comment,
+      rating: rating || null,
+      createdAt: new Date(),
+    };
+
+    const result = await commentsCollection.insertOne(newComment);
+    res.status(201).json({ success: true, commentId: result.insertedId });
+  } catch (err) {
+    console.error('Comment insert error:', err);
+    res.status(500).json({ error: 'Server error adding comment' });
+  }
+});
+
+// Update an existing comment
+app.put('/api/comments/:commentId', async (req, res) => {
+  const { comment, rating } = req.body;
+
+  try {
+    const result = await commentsCollection.updateOne(
+      { _id: new ObjectId(req.params.commentId) },
+      {
+        $set: {
+          comment,
+          rating,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: 'Comment not found or not changed' });
+    }
+  } catch (err) {
+    console.error('Update error:', err);
+    res.status(500).json({ error: 'Server error updating comment' });
+  }
+});
+
+
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
+
+
+
+async function insertCareerOfficerManually() {
+  const { ObjectId } = require('mongodb');
+  // const bcrypt = require('bcrypt');
+  const db = await connectToDb();
+
+  const staffUserId = new ObjectId();
+  const hashedPassword = await bcrypt.hash("123", 10); // change as needed
+
+  // Insert into Users collection
+  await db.collection('users').insertOne({
+    _id: staffUserId,
+    fname: "cyp",
+    lname: "cyp",
+    email: "cyprian.kamau@strathmore.edu",
+    password: hashedPassword,
+    role: "careerOfficer",
+    verified: true,
+    createdAt: new Date()
+  });
+
+  // Insert into CareerOffice collection
+  await db.collection('careerOffice').insertOne({
+    StaffID: "CO001",
+    userID: staffUserId,
+    Name: "Paul Macharia",
+    OrgName: "Strathmore University",
+    Phone: "0712345678",
+    Email: "pmacharia@strathmore.edu",
+    description: "Handles all student internship verification."
+  });
+
+  console.log("✅ Career Officer added successfully.");
+  process.exit(); // stop server after insert
+}
+// view analytics
+
+
+
 // fixing some issues with the Internships schema
 // async function linkInternshipsToEmployers() {
 //   try {
@@ -1553,29 +1873,7 @@ app.put('/api/career-office/:staffId', async (req, res) => {
 // linkInternshipsToEmployers();
 
 // GET internships with employer data
-app.get('/api/internships', async (req, res) => {
-  try {
-    const db = await connectToDb();
-    const internships = await db.collection("Internships").aggregate([
-      {
-        $lookup: {
-          from: "Employer",
-          localField: "employerId",
-          foreignField: "_id",
-          as: "employer"
-        }
-      },
-      { $unwind: "$employer" }, // Flatten employer array
-      { $match: { "employer.verified": true } }, // Show only verified
-      { $sort: { postedAt: -1 } } // Optional: newest first
-    ]).toArray();
 
-    res.json(internships);
-  } catch (err) {
-    console.error("Error fetching internships:", err);
-    res.status(500).json({ message: "Server error fetching internships" });
-  }
-});
 
 // ⚠️ Un-comment the line below ONLY when you want to insert the career officer
 //  insertCareerOfficerManually();

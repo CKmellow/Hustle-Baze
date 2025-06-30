@@ -1,251 +1,228 @@
 @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Matemasie&family=Sofadi+One&display=swap');
-*{
-    letter-spacing: 0.5px;
-    word-spacing: normal;
-     font-family: "Sofadi One", system-ui;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-   
-  }
-  :root {
-    --color-1: #F72585;
-    --color-2: #B5179E;
-    --color-3: #7209B7;
-    --color-4: #560BAD;
-    --color-5: #3A0CA3;
-    --color-6: #4361EE;
-    --color-7: #4895EF;
-    --color-8: #4CC9F0;
-  }
-  html{
-    font-size: 70%;
-    scroll-behavior: smooth;
-    overflow-x: hidden;
-    scroll-padding-top: 7rem;
-  }
 
-.sofadi-one-regular {
+* {
+  letter-spacing: 0.5px;
   font-family: "Sofadi One", system-ui;
-  font-weight: 400;
-  font-style: normal;
-}
-.marcellus-regular {
-  font-family: "Marcellus", serif;
-  font-weight: 400;
-  font-style: normal;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Container for the entire login form */
+:root {
+  --color-1: #F72585;
+  --color-2: #B5179E;
+  --color-3: #7209B7;
+  --color-4: #560BAD;
+  --color-5: #3A0CA3;
+  --color-6: #4361EE;
+  --color-7: #4895EF;
+  --color-8: #4CC9F0;
+}
+
+html {
+  font-size: 70%;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
 .login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f4f9ff; /* Light blue background */
-    padding: 20px;
-  }
-  
-  /* Header styling */
-  .login-container h2 {
-    font-size: 2.5rem;
-    font-weight: bold;
-
-    background: -webkit-linear-gradient(to right,#F72585 , #4895EF);  
-    background: linear-gradient(to right, #F72585, #4895EF); 
-    background-size: 100%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    text-decoration: none;
-     /* Teal color for the header */
-    margin-bottom: 1rem;
-  }
-  
-  /* Styling for the login form */
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-    margin-top: 20px;
-  }
-  
-  /* Input fields */
-  input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 1.7rem;
-    background-color: #f4f9ff;
-  }
-  
-  /* Login button */
-  button[type="submit"] {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: var(--color-6); 
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1.6rem;
-    position: relative; 
-    transition: color 0.35s ease-in; 
-    margin-bottom: 1rem;
-}
-
-button[type="submit"]:hover {
-    color: #fff; 
-}
-
-button[type="submit"]:hover:after {
-    width: 100%; 
-}
-
-button[type="submit"]:after {
-    position: absolute;
-    content: "";
-    top: 0;
-    left: 0;
-    width: 0; /* Initial width */
-    height: 100%;
-    background: var(--color-7); 
-    transition: width 0.35s ease-in; 
-    border-radius: 6px; 
-    z-index: 1; 
-}
-
-button[type="submit"] span {
-    position: relative;
-    color: white; 
-    z-index: 2; /* Ensure text is above the background */
-  
-    text-decoration: none;
-    transition: color 0.35s ease-in; /* Smooth transition for text color */
-}
-
-button[type="submit"]:hover span {
-    color: #fff; /* Maintain text color on hover */
-}
-  /* Error message styling */
-  .error-message {
-    color: #ff4d4d; /* Red color for error messages */
-    font-size: 1.2rem;
-    margin-top: 1rem;
-  }
-  
-  /* Tabs for toggling */
-  .tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #ccc;
-    transform: all 0.3s ease;
-  }
-  
-  .tab {
-    padding: 10px 20px;
-    cursor: pointer;
-    font-weight: bold;
-    background-color: #f4f9ff;
-    /* color: #333; */
-    font-size: medium;
-    
-    /* z-index: 1; Ensure tabs are above the background */
-    transition: border-bottom 0.3s ease, color 0.3s ease;
-  }
-  .tab.active{
-    color: var(--color-2);
-    border-bottom: 2px solid var(--color-2);
-    font-size: medium;
-    background-color: #f4f9ff;
-  }
-  
-  select {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 1.4rem;
-    background-color: #f4f9ff;
-    color: #333; /* Text color */
-    appearance: none; /* Remove default dropdown arrow for consistency across browsers */
-    -webkit-appearance: none; /* WebKit-specific */
-    -moz-appearance: none; /* Mozilla-specific */
-    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path fill='%23333' d='M0 0l5 6 5-6z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 10px;
-  }
-  
-  /* Dropdown hover and focus states */
-  select:focus,
-  select:hover {
-    border-color: var(--color-6);
-    outline: none;
-  }
-  
-  /* For alignment with the placeholder text */
-  select option {
-    color: #333;
-  }
-  
-  /* Input fields */
-  input[type="text"], input[type="password"], input[type="email"] {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 1.4rem;
-    background-color: #f4f9ff;
-  }
-  /* Container for the checkbox options */
-.options {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f4f9ff;
+  padding: 20px;
+}
+
+.login-container h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(to right, #F72585, #4895EF);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   margin-bottom: 1rem;
-  font-size: 1.4rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: 1.4rem;
+  position: relative;
+}
+
+/* Input fields */
+/* Unified styling for all input types and select dropdowns */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1.6rem; /* <== Consistent font size */
+  background-color: #f4f9ff;
+  text-align: left;
   color: #333;
 }
 
-/* Styling for both checkboxes */
-.options label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.3rem;
+/* Ensure select specifically inherits the font properly */
+select option {
+  font-size: 1.6rem;
+}
+
+
+/* Password wrapper for icon */
+.password-wrapper input {
+  padding-right: 3rem;
+}
+
+.eye-icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: var(--color-7);
   cursor: pointer;
 }
 
-/* Styling for checkboxes */
-.options input[type="checkbox"] {
+.eye-icon:hover {
+  color: var(--color-8);
+}
+
+/* Submit button */
+button[type="submit"] {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--color-6);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.6rem;
+  position: relative;
+  transition: color 0.35s ease-in;
+  margin-top: 1rem;
+}
+
+button[type="submit"]:hover {
+  color: #fff;
+}
+
+button[type="submit"]:hover::after {
+  width: 100%;
+}
+
+button[type="submit"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: var(--color-7);
+  transition: width 0.35s ease-in;
+  border-radius: 6px;
+  z-index: 1;
+}
+
+button[type="submit"] span {
+  position: relative;
+  z-index: 2;
+  color: white;
+}
+
+/* Tabs for login/signup toggle */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #f4f9ff;
+  font-size: medium;
+  transition: border-bottom 0.3s ease, color 0.3s ease;
+}
+
+.tab.active {
+  color: var(--color-2);
+  border-bottom: 2px solid var(--color-2);
+  background-color: #f4f9ff;
+}
+
+/* Dropdown (select) */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path fill='%23333' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+  color: #333;
+}
+
+select:focus,
+select:hover {
+  border-color: var(--color-6);
+  outline: none;
+}
+
+/* Login options row */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.login-options input[type="checkbox"] {
   width: 1.5rem;
   height: 1.5rem;
   accent-color: var(--color-6);
   cursor: pointer;
-  border-radius: 4px;
 }
 
-/* Optional hover effect for label */
-.options label:hover {
-  color: var(--color-6);
+/* Forgot password link */
+.forgot-password {
+  text-decoration: none;
+  color: #007BFF;
+  transition: color 0.3s;
 }
 
-  
-  
-  
-  
-  
+.forgot-password:hover {
+  color: var(--color-2);
+}
+
+/* Error Message */
+.error-message {
+  color: #ff4d4d;
+  font-size: 1.4rem;
+  margin-top: 1rem;
+  text-align: center;
+}

@@ -6,7 +6,8 @@ import Topbar from './Topbar';
 import Applications from './Applications';
 import Internships from './Internships';
 import ApplicationForm from './ApplicationForm';
-import StudentProfile from './StudentProfile'; // Import the new Profile component
+import StudentProfile from './StudentProfile'; 
+import StudentComments from './StudentComments';
 
 const StudentLayout = () => {
   const [activePage, setActivePage] = useState("Dashboard");
@@ -24,6 +25,8 @@ const StudentLayout = () => {
         return <ApplicationForm setActivePage={setActivePage} />;
       case "Profile":
         return <StudentProfile setActivePage={setActivePage} />;
+      case "Comments":
+        return <StudentComments setActivePage={setActivePage} />;
       // case "Reports":
       //   return <div>Progress Reports Page</div>;
       // case "Messages":
