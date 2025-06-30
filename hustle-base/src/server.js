@@ -7,18 +7,8 @@ const crypto = require("crypto");
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
-// const storage = multer.memoryStorage();
-// const upload = multer({ storage });
-// const cloudinary = require('cloudinary').v2;
-// const cloudinary = require('./cloudinaryConfig');
 const { Readable } = require('stream');
-const cloudinary = require('cloudinary').v2;
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -34,7 +24,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+//const upload = multer({ storage });
 
 
 
@@ -45,12 +35,16 @@ const nodemailer = require('nodemailer');
 const app = express();
 const port = 5000;
 
+
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Middleware
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads'));
 
-// Configure file upload storage
+
+// //Configure file upload storage
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
 //     const uploadDir = 'uploads/';
@@ -72,19 +66,19 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// const upload = multer({ 
-//   storage: storage,
-//   fileFilter: (req, file, cb) => {
-//     if (file.mimetype === 'application/pdf') {
-//       cb(null, true);
-//     } else {
-//       cb(new Error('Only PDF files are allowed'), false);
-//     }
-//   },
-//   limits: {
-//     fileSize: 5 * 1024 * 1024 // 5MB limit
-//   }
-// });
+const upload = multer({ 
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'), false);
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
 
 const uri = "mongodb+srv://Admin:Hustlebase@hustle-base.goii2xv.mongodb.net/?retryWrites=true&w=majority&appName=Hustle-Base";
 const client = new MongoClient(uri);
@@ -103,6 +97,8 @@ async function connectToDb() {
         throw new Error('Failed to connect to the database');
     }
 }
+
+
 
 // Middleware for Authentication
 const authMiddleware = async (req, res, next) => {
@@ -282,7 +278,7 @@ app.get('/verify-email', async (req, res) => {
 app.get('/api/applications', authMiddleware, async (req, res) => {
     try {
         const { status, sortBy, search } = req.query;
-        const studentID = req.user._id;
+        const studentID = new ObjectId(req.user._id);
         
         const db = await connectToDb();
         const applicationsCollection = db.collection("Applications");
@@ -318,84 +314,108 @@ app.get('/api/applications', authMiddleware, async (req, res) => {
 
 // Upload documents for application
 app.post('/api/applications/:id/documents', authMiddleware, upload.fields([
-    { name: 'coverLetter', maxCount: 1 },
-    { name: 'cv', maxCount: 1 }
+  { name: 'coverLetter', maxCount: 1 },
+  { name: 'cv', maxCount: 1 }
 ]), async (req, res) => {
-    try {
-        const db = await connectToDb();
-        const applicationsCollection = db.collection("Applications");
-        
-        const application = await applicationsCollection.findOne({
-            _id: new ObjectId(req.params.id),
-            studentID: req.user._id
-        });
-        
-        if (!application) {
-            return res.status(404).json({ message: 'Application not found' });
-        }
-        
-        const updateData = {};
-        if (req.files.coverLetter) {
-            updateData.coverLetter = req.files.coverLetter[0].path;
-        }
-        
-        if (req.files.cv) {
-            updateData.cv = req.files.cv[0].path;
-        }
-        
-        const result = await applicationsCollection.updateOne(
-            { _id: new ObjectId(req.params.id) },
-            { $set: updateData }
-        );
-        
-        res.json({ message: 'Documents uploaded successfully', modifiedCount: result.modifiedCount });
-    } catch (err) {
-        console.error("Error uploading documents:", err);
-        res.status(400).json({ message: err.message });
-    }
-});
-
-app.delete('/api/applications/:id', authMiddleware, async (req, res) => {
   try {
     const db = await connectToDb();
     const applicationsCollection = db.collection("Applications");
 
-    const result = await applicationsCollection.findOneAndDelete({
+    const application = await applicationsCollection.findOne({
       _id: new ObjectId(req.params.id),
       studentID: req.user._id
     });
 
-    if (!result.value) {
+    if (!application) {
       return res.status(404).json({ message: 'Application not found' });
     }
 
-    // Delete files from Cloudinary using public_id
-    const { coverLetter, cv } = result.value;
+    const updateData = {};
+    if (req.files.coverLetter) {
+      updateData.coverLetter = req.files.coverLetter[0].path;  // store file path
+    }
 
-    const deleteFromCloudinary = async (doc) => {
-      if (doc && doc.public_id) {
-        try {
-          await cloudinary.uploader.destroy(doc.public_id, {
-            resource_type: 'raw' // because it's a PDF
-          });
-        } catch (err) {
-          console.warn("Cloudinary delete failed for", doc.public_id, err.message);
-        }
-      }
-    };
+    if (req.files.cv) {
+      updateData.cv = req.files.cv[0].path;  // store file path
+    }
 
-    await Promise.all([deleteFromCloudinary(coverLetter), deleteFromCloudinary(cv)]);
+    const result = await applicationsCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: updateData }
+    );
 
-    res.json({ message: 'Application deleted successfully' });
+    res.json({ message: 'Documents uploaded successfully', modifiedCount: result.modifiedCount });
   } catch (err) {
-    console.error("Error deleting application:", err);
-    res.status(500).json({ message: err.message });
+    console.error("Error uploading documents:", err);
+    res.status(400).json({ message: err.message });
   }
 });
 
+// app.post('/api/applications/:id/documents', authMiddleware, upload.fields([
+//     { name: 'coverLetter', maxCount: 1 },
+//     { name: 'cv', maxCount: 1 }
+// ]), async (req, res) => {
+//     try {
+//         const db = await connectToDb();
+//         const applicationsCollection = db.collection("Applications");
+        
+//         const application = await applicationsCollection.findOne({
+//             _id: new ObjectId(req.params.id),
+//             studentID: req.user._id
+//         });
+        
+//         if (!application) {
+//             return res.status(404).json({ message: 'Application not found' });
+//         }
+        
+//         const updateData = {};
+//         if (req.files.coverLetter) {
+//             updateData.coverLetter = req.files.coverLetter[0].path;
+//         }
+        
+//         if (req.files.cv) {
+//             updateData.cv = req.files.cv[0].path;
+//         }
+        
+//         const result = await applicationsCollection.updateOne(
+//             { _id: new ObjectId(req.params.id) },
+//             { $set: updateData }
+//         );
+        
+//         res.json({ message: 'Documents uploaded successfully', modifiedCount: result.modifiedCount });
+//     } catch (err) {
+//         console.error("Error uploading documents:", err);
+//         res.status(400).json({ message: err.message });
+//     }
+// });
+// DELETE /api/applications/:id
+app.delete('/api/applications/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { ObjectId } = require('mongodb');
+
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid application ID' });
+  }
+
+  try {
+    const db = await connectToDb();
+    const result = await db.collection('Applications').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    res.status(200).json({ message: 'Application deleted successfully' });
+  } catch (error) {
+    console.error('Delete application error:', error);
+    res.status(500).json({ message: 'Server error while deleting application' });
+  }
+});
+
+
 // Get application status counts
 app.get('/api/student/:studentID/application-status-counts', authMiddleware, async (req, res) => {
-    const studentID = req.params.studentID.trim();
+    const studentID = new ObjectId(req.params.studentID.trim());
     
     if (req.user._id !== studentID && req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Unauthorized' });
@@ -432,7 +452,6 @@ app.get('/api/student/:studentID/application-status-counts', authMiddleware, asy
     }
 });
 
-// Employer application status counts endpoint
 app.get('/api/employers/:employerID/application-status-counts', authMiddleware, async (req, res) => {
   const ObjectId = require('mongodb').ObjectId;
   const employerID = req.params.employerID;
@@ -443,10 +462,17 @@ app.get('/api/employers/:employerID/application-status-counts', authMiddleware, 
 
   try {
     const db = await connectToDb();
-    const applicationsCollection = db.collection("Applications");
 
+    // Get all internships by this employer
+    const internshipsCollection = db.collection("Internships");
+    const internshipDocs = await internshipsCollection.find({ employerId: new ObjectId(employerID) }).toArray();
+
+    const internshipIds = internshipDocs.map(doc => doc._id);
+
+    // Count applications by status across all internships posted by this employer
+    const applicationsCollection = db.collection("Applications");
     const counts = await applicationsCollection.aggregate([
-      { $match: { employerID: new ObjectId(employerID) } },
+      { $match: { internshipID: { $in: internshipIds } } },
       { $group: { _id: "$status", count: { $sum: 1 } } }
     ]).toArray();
 
@@ -463,9 +489,13 @@ app.get('/api/employers/:employerID/application-status-counts', authMiddleware, 
       }
     });
 
-    res.status(200).json({ success: true, applicationCounts: response });
+    res.status(200).json({
+      success: true,
+      applicationCounts: response,
+      internshipCount: internshipDocs.length // ✅ Include internship count
+    });
   } catch (error) {
-    console.error("Employer application counts error:", error);
+    console.error("Dashboard stats error:", error);
     res.status(500).json({ success: false, message: "Server error. Try again later." });
   }
 });
@@ -505,17 +535,25 @@ app.get('/api/internships', async (req, res) => {
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.single('file'), async (req, res) => {
+app.post('/api/upload', upload.fields([
+  { name: 'cv', maxCount: 1 },
+  { name: 'coverLetter', maxCount: 1 }
+]), async (req, res) => {
   try {
-    if (!req.file) {
+    const fileKey = req.files.cv ? 'cv' : 'coverLetter';
+
+    if (!req.files || !req.files[fileKey] || !req.files[fileKey][0]) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    res.json({ filePath: req.file.path });
+
+    const file = req.files[fileKey][0];
+    res.json({ filePath: file.path });
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ message: "File upload failed", error: err.message });
   }
 });
+
 
 // Create new application
 app.post('/api/applications', authMiddleware, async (req, res) => {
@@ -534,8 +572,8 @@ app.post('/api/applications', authMiddleware, async (req, res) => {
     }
     
     const application = {
-      internshipID: req.body.internship,
-      studentID: req.user._id,
+      internshipID: new ObjectId(req.body.internship),
+      studentID: new ObjectId(req.user._id),
       status: req.body.status || 'pending',
       feedback: req.body.feedback || 'N/A',
       coverLetter: req.body.coverLetter,
@@ -1080,6 +1118,195 @@ app.delete('/api/internships/:id', authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to delete internship' });
   }
 });
+
+// GET /api/internships/:id/applications
+// app.get('/api/internships/:id/applications', authMiddleware, async (req, res) => {
+//   const { ObjectId } = require('mongodb');
+//   const internshipId = req.params.id;
+
+//   if (!ObjectId.isValid(internshipId)) {
+//     return res.status(400).json({ success: false, message: 'Invalid internship ID' });
+//   }
+
+//   try {
+//     const db = await connectToDb();
+
+//     // Find all applications for this internship
+//     const applications = await db.collection('Applications')
+//       .find({ internshipID: internshipId })
+//       .toArray();
+
+//     // Enrich with student + user info
+//     const enriched = await Promise.all(applications.map(async (app) => {
+//       const student = await db.collection('Students').findOne({ userID: new ObjectId(app.studentID) });
+//       const user = await db.collection('Users').findOne({ _id: new ObjectId(app.studentID) });
+
+//       return {
+//         applicationId: app._id,
+//         studentId: app.studentID,
+//         name: `${user?.fname ?? ''} ${user?.lname ?? ''}`.trim(),
+//         email: user?.email ?? '',
+//         school: student?.OrgName ?? '',
+//         phone: student?.phone ?? '',
+//         feedback: app.feedback,
+//         description: app.description || '',
+//         cv: app.cv,
+//         coverLetter: app.coverLetter,
+//         applicationDate: app.applicationDate
+//       };
+//     }));
+
+//     res.status(200).json({ success: true, applications: enriched });
+//   } catch (err) {
+//     console.error('Error fetching applications:', err);
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// });
+
+// PUT /api/applications/:id/feedback
+// app.put('/api/applications/:id/feedback', authMiddleware, async (req, res) => {
+//   const { ObjectId } = require('mongodb');
+//   const applicationId = req.params.id;
+//   const { feedback, description } = req.body;
+
+//   if (!ObjectId.isValid(applicationId)) {
+//     return res.status(400).json({ success: false, message: 'Invalid application ID' });
+//   }
+
+//   try {
+//     const db = await connectToDb();
+
+//     await db.collection('Applications').updateOne(
+//       { _id: new ObjectId(applicationId) },
+//       { $set: { feedback, description } }
+//     );
+
+//     res.status(200).json({ success: true, message: 'Feedback updated' });
+//   } catch (err) {
+//     console.error('Error updating feedback:', err);
+//     res.status(500).json({ success: false, message: 'Update failed' });
+//   }
+// });
+
+// In your backend (Node + Express + MongoDB)
+app.get('/api/internships/:id/applications', authMiddleware, async (req, res) => {
+  const internshipId = req.params.id;
+  console.log(internshipId);
+  const db = await connectToDb();
+
+  const applications = await db.collection('Applications').aggregate([
+    { $match: { internshipID: new ObjectId(internshipId) } },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'studentID',
+        foreignField: '_id',
+        as: 'user'
+      }
+    },
+    { $unwind: '$user' },
+    {
+      $lookup: {
+        from: 'Students',
+        localField: 'studentID',
+        foreignField: 'userID',
+        as: 'student'
+      }
+    },
+    { $unwind: '$student' },
+    {
+      $project: {
+        applicationId: '$_id',
+        name: { $concat: ['$user.fname', ' ', '$user.lname'] },
+        email: '$user.email',
+        phone: '$student.phone',
+        school: '$student.OrgName',
+        feedback: 1,
+        description: 1,
+        cv: 1,
+        coverLetter: 1,
+        applicationDate: 1
+      }
+    }
+  ]).toArray();
+  console.log("applications")
+  console.log(applications)
+  res.status(200).json({ applications });
+});
+
+app.put('/api/applications/:id/feedback', async (req, res) => {
+  const { id } = req.params;
+  const { feedback, description } = req.body;
+
+  const db = await connectToDb();
+  await db.collection('Applications').updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { feedback, description } }
+  );
+
+  res.status(200).json({ message: 'Feedback updated' });
+});
+
+app.get('/api/internships/:id/download-all', async (req, res) => {
+  const internshipId = req.params.id;
+
+  try {
+    const db = await connectToDb();
+
+    const applications = await db.collection('Applications').aggregate([
+      { $match: { internshipID: new ObjectId(internshipId) } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentID',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' }
+    ]).toArray();
+
+    if (!applications.length) {
+      return res.status(404).send('No applications found.');
+    }
+
+    // Set zip headers
+    res.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="applications_${internshipId}.zip"`
+    });
+
+    const archive = archiver('zip');
+    archive.pipe(res); // Stream to response
+
+    for (const app of applications) {
+      const { fname, lname } = app.user;
+      const name = `${fname}_${lname}`.replace(/\s+/g, '_');
+
+      // Add CV if exists
+      if (app.cv) {
+        const cvPath = path.join(__dirname, app.cv); // assuming cv = 'uploads/filename.pdf'
+        if (fs.existsSync(cvPath)) {
+          archive.file(cvPath, { name: `${name}_CV.pdf` });
+        }
+      }
+
+      // Add Cover Letter if exists
+      if (app.coverLetter) {
+        const coverPath = path.join(__dirname, app.coverLetter);
+        if (fs.existsSync(coverPath)) {
+          archive.file(coverPath, { name: `${name}_CoverLetter.pdf` });
+        }
+      }
+    }
+
+    archive.finalize();
+  } catch (err) {
+    console.error('Download-all error:', err);
+    res.status(500).send('Internal server error');
+  }
+});
+
 
 
 

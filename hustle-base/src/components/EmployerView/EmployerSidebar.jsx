@@ -12,7 +12,7 @@ const EmployerSidebar = ({ setActivePage }) => {
     };
   const links = [
     { key: 'Dashboard', label: 'Dashboard', icon: <FaHome /> },
-    { key: 'Applications', label: 'My Applications', icon: <FaClipboardList /> },
+    // { key: 'Applications', label: 'My Applications', icon: <FaClipboardList /> },
     { key: 'Internships', label: 'Internships', icon: <FaBriefcase /> },
     // { key: 'reports', label: 'Progress Reports', icon: <FaFileAlt /> },
     // { key: 'messages', label: 'Messages', icon: <FaEnvelope /> },
