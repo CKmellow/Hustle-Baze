@@ -1,39 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import './StudentComments.css';
+import { FaEdit, FaSave, FaTrashAlt, FaStar, FaRegStar } from 'react-icons/fa';
 
-const StarRating = ({ rating, setRating, editable = false }) => {
-  return (
-    <div className="star-rating">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <span
-          key={star}
-          className={`star ${star <= rating ? 'filled' : ''} ${editable ? 'clickable' : ''}`}
-          onClick={() => editable && setRating(star)}
-        >
-          ★
-        </span>
-      ))}
-    </div>
-  );
-};
+const StarRating = ({ rating, setRating, editable = false }) => (
+  <div className="star-rating">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <span
+        key={star}
+        className={`star ${star <= rating ? 'filled' : ''} ${editable ? 'clickable' : ''}`}
+        onClick={() => editable && setRating(star)}
+      >
+        {star <= rating ? <FaStar /> : <FaRegStar />}
+      </span>
+    ))}
+  </div>
+);
 
 const StudentComments = () => {
   const [comments, setComments] = useState([]);
+  const [internshipId, setInternshipId] = useState(null);
+
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ comment: '', rating: 0 });
+  const [loading, setLoading] = useState(true);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [newComment, setNewComment] = useState({ comment: '', rating: 0 });
 
   const student = JSON.parse(localStorage.getItem('user'));
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    if (!student?._id) return;
+  const fetchComments = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/comments/${student._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setComments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+      setComments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetch(`http://localhost:5000/api/comments/${student._id}`, {
+  const checkApplicationStatus = async () => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/applications/check/${student._id}`, {
       headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setComments(data));
+    });
+    const data = await res.json();
+    console.log("Check application response:", data);
+    setHasApplied(data.hasApplied);
+    setInternshipId(data.internshipId); // 👈 Save the internshipId
+  } catch (err) {
+    console.error('Error checking application status:', err);
+  }
+};
+
+  useEffect(() => {
+    if (student?._id) {
+      fetchComments();
+      checkApplicationStatus();
+    }
   }, [student]);
 
   const handleEdit = (comment) => {
@@ -42,33 +71,94 @@ const StudentComments = () => {
   };
 
   const handleSave = async () => {
-    await fetch(`http://localhost:5000/api/comments/${editingId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      await fetch(`http://localhost:5000/api/comments/${editingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
+      await fetchComments();
+      setEditingId(null);
+    } catch (err) {
+      console.error('Error updating comment:', err);
+    }
+  };
 
-    const res = await fetch(`http://localhost:5000/api/comments/${student._id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const updated = await res.json();
-    setComments(updated);
-    setEditingId(null);
+  const handleDelete = async (id) => {
+    const confirm = window.confirm('Are you sure you want to delete this comment?');
+    if (!confirm) return;
+
+    try {
+      await fetch(`http://localhost:5000/api/comments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      await fetchComments();
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+    }
+  };
+
+  const handleNewComment = async () => {
+    try {
+      await fetch(`http://localhost:5000/api/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          internshipId, 
+          studentId: student._id,
+          comment: newComment.comment,
+          rating: newComment.rating,
+        }),
+      });
+
+      setNewComment({ comment: '', rating: 0 });
+      await fetchComments();
+    } catch (err) {
+      console.error('Error posting new comment:', err);
+    }
   };
 
   return (
     <div className="student-comments">
-      <h3>📝 My Internship Comments & Ratings</h3>
+      <h3>My Internship Comments & Ratings</h3>
 
-      {comments.length === 0 ? (
-        <div className="no-comments animated-warning">
-          ❗You haven't commented on any internship yet.
-          <br />
-          Submit an application first to leave a comment.
-        </div>
+      {loading ? (
+        <p className="loading">Loading comments...</p>
+      ) : comments.length === 0 ? (
+        hasApplied ? (
+          <div className="comment-form">
+            <h4>Leave a Comment</h4>
+            <textarea
+              value={newComment.comment}
+              onChange={(e) => setNewComment({ ...newComment, comment: e.target.value })}
+              placeholder="Your feedback..."
+              rows={3}
+            />
+            <StarRating
+              rating={newComment.rating}
+              setRating={(value) => setNewComment({ ...newComment, rating: value })}
+              editable={true}
+            />
+            <button className="btn save-btn" onClick={handleNewComment}>
+              Submit Comment
+            </button>
+          </div>
+        ) : (
+          <div className="no-comments">
+            You haven’t commented on any internship yet.
+            <br />
+            Submit an application first to leave a comment.
+          </div>
+        )
       ) : (
         comments.map((c) => (
           <div className="comment-card" key={c._id}>
@@ -85,7 +175,11 @@ const StudentComments = () => {
                   setRating={(value) => setForm({ ...form, rating: value })}
                   editable={true}
                 />
-                <button className="btn save-btn" onClick={handleSave}>💾 Save</button>
+                <div className="btn-group">
+                  <button className="btn save-btn" onClick={handleSave}>
+                    <FaSave /> Save
+                  </button>
+                </div>
               </div>
             ) : (
               <>
@@ -93,7 +187,14 @@ const StudentComments = () => {
                 <p className="rating-label">
                   Rating: <StarRating rating={c.rating} editable={false} />
                 </p>
-                <button className="btn edit-btn" onClick={() => handleEdit(c)}>✏️ Edit</button>
+                <div className="btn-group">
+                  <button className="btn edit-btn" onClick={() => handleEdit(c)}>
+                    <FaEdit /> Edit
+                  </button>
+                  <button className="btn delete-btn" onClick={() => handleDelete(c._id)}>
+                    <FaTrashAlt /> Delete
+                  </button>
+                </div>
               </>
             )}
           </div>
