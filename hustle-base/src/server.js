@@ -1388,13 +1388,26 @@ app.get('/api/applications/analytics', async (req, res) => {
 app.get('/api/employers', async (req, res) => {
   try {
     const db = await connectToDb();
-    const employers = await db.collection('Employer').find().toArray();
-    res.json(employers);
+    const employers = await db.collection('Employer')
+      .find({ company: { $exists: true } })
+      .toArray();
+
+    const employersWithStatus = employers.map(emp => {
+      let status = 'Pending';
+      if (emp.verified) status = 'Verified';
+      else if (emp.reported) status = 'Reported';
+      return { ...emp, status };
+    });
+
+    console.log("With status:", employersWithStatus); // Confirm here
+
+    res.json(employersWithStatus);
   } catch (error) {
     console.error("Error fetching employers:", error);
     res.status(500).json({ message: "Failed to fetch employers." });
   }
 });
+
 // career officer's profile
 app.get('/api/career-office/:staffId', async (req, res) => {
   const { userId } = req.params;
