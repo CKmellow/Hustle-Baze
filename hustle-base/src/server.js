@@ -1903,13 +1903,42 @@ app.get('/api/applications/check/:studentId', async (req, res) => {
 app.get('/api/comments', async (req, res) => {
   try {
     const db = await connectToDb();
-    const comments = await db.collection("Comments").find().toArray();
+    const comments = await db.collection("Comments").aggregate([
+      {
+        $lookup: {
+          from: "Students",               // your students collection name
+          localField: "studentId",        // field in Comments
+          foreignField: "_id",            // field in Students
+          as: "studentInfo"
+        }
+      },
+      {
+        $unwind: {
+          path: "$studentInfo",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          comment: 1,
+          rating: 1,
+          internshipId: 1,
+          createdAt: 1,
+          studentId: 1,
+          studentName: { 
+            $concat: ["$studentInfo.fname", " ", "$studentInfo.lname"] 
+          }
+        }
+      }
+    ]).toArray();
+
     res.json({ success: true, data: comments });
   } catch (err) {
     console.error('Error fetching all comments:', err);
     res.status(500).json({ success: false, error: 'Server error fetching comments' });
   }
 });
+
 // admin delete comment by commentId
 app.delete('/api/comments/:commentId', async (req, res) => {
   try {
@@ -1925,7 +1954,39 @@ app.delete('/api/comments/:commentId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error deleting comment' });
   }
 });
+//admin to view all users
+app.get('/api/users', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const users = await db.collection("users")
+      .find({ role: { $ne: "careerOfficer" } })
+      .project({ fname: 1, lname: 1, email: 1, role: 1 })
+      .toArray();
 
+    res.json({ success: true, data: users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, message: "Server error fetching users" });
+  }
+});
+//admin to delete all users
+app.delete('/api/users/:userId', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const userId = req.params.userId;
+
+    const result = await db.collection("users").deleteOne({ _id: new ObjectId(userId) });
+
+    if (result.deletedCount === 1) {
+      res.json({ success: true, message: "User deleted successfully" });
+    } else {
+      res.status(404).json({ success: false, message: "User not found" });
+    }
+  } catch (error) {
+    console.error("Delete user error:", error);
+    res.status(500).json({ success: false, message: "Server error deleting user" });
+  }
+});
 
 
 // Start the server
