@@ -70,7 +70,8 @@ useEffect(() => {
 
   return (
     <div className="career-layout">
-      <Topbar />
+      <Topbar setActivePage={setActivePage} />
+
       <div className="career-dashboard">
         <aside className="sidebars">
           <h2>Career Portal</h2>
