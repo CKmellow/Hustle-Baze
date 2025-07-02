@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 import './VerifyOrganizations.css';
+
 
 const VerifyOrganizations = () => {
   const [employers, setEmployers] = useState([]);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    fetch('http://localhost:5000/api/employers')
-      .then(res => res.json())
-      .then(data => setEmployers(data))
-      .catch(err => console.error("Failed to load employers", err));
-  }, []);
+ useEffect(() => {
+  fetch('http://localhost:5000/api/employers')
+    .then(res => res.json())
+    .then(data => {
+      console.log("Employers:", data); // 👀 See if `status` appears
+      setEmployers(data);
+    })
+    .catch(err => console.error("Failed to load employers", err));
+}, []);
 
   const handleVerify = async (id) => {
     const confirmVerify = window.confirm("Are you sure you want to verify this employer?");
@@ -68,10 +75,54 @@ const VerifyOrganizations = () => {
   };
 
   const filteredEmployers = employers.filter(emp => {
-    if (filter === 'verified') return emp.verified === true;
-    if (filter === 'reported') return emp.reported === true;
-    return emp.verified === false && !emp.reported; // Default: unreviewed
+  if (filter === 'verified') return emp.status === 'Verified';
+  if (filter === 'reported') return emp.status === 'Reported';
+  if (filter === 'pending') return emp.status === 'Pending';
+  return true; // 'all' shows everyone
+});
+const downloadPDF = () => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text('Employer Report', 14, 22);
+  doc.setFontSize(11);
+  doc.setTextColor(100);
+
+  const filtered = employers.filter(emp => {
+    if (filter === 'verified') return emp.status === 'Verified';
+    if (filter === 'reported') return emp.status === 'Reported';
+    if (filter === 'pending') return emp.status === 'Pending';
+    return true; // all
   });
+
+  const tableData = filtered.map(emp => [
+    emp.company,
+    emp.email,
+    emp.website,
+    emp.contact,
+    emp.status
+  ]);
+
+  autoTable(doc, {
+    head: [['Company', 'Email', 'Website', 'Contact', 'Status']],
+    body: tableData,
+    startY: 30,
+    styles: {
+      fontSize: 10,
+      cellPadding: 3,
+    },
+    headStyles: {
+      fillColor: [58, 12, 163], // Purple header
+      textColor: 255,
+      halign: 'center',
+    },
+  });
+
+  const dateStr = new Date().toISOString().split('T')[0];
+  const fileName = `Employer_Report_${filter}_${dateStr}.pdf`;
+  doc.save(fileName);
+};
+
 
   return (
     <div className="verify-orgs">
@@ -79,9 +130,11 @@ const VerifyOrganizations = () => {
 
       <div className="filter-tabs">
         <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>All</button>
+        <button className={filter === 'pending' ? 'active' : ''} onClick={() => setFilter('pending')}>⏳ Pending</button>
         <button className={filter === 'verified' ? 'active' : ''} onClick={() => setFilter('verified')}>✅ Verified</button>
         <button className={filter === 'reported' ? 'active' : ''} onClick={() => setFilter('reported')}>🚩 Reported</button>
       </div>
+<button onClick={downloadPDF} className="btn-download">📄 Export PDF</button>
 
       {filteredEmployers.length === 0 ? (
         <p>No employers to display.</p>
@@ -94,32 +147,34 @@ const VerifyOrganizations = () => {
               <th>Website</th>
               <th>Contact</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th>Edit</th>
             </tr>
           </thead>
           <tbody>
-            {filteredEmployers.map(emp => (
-              <tr key={emp._id}>
-                <td>{emp.company}</td>
-                <td>{emp.email}</td>
-                <td><a href={emp.website} target="_blank" rel="noreferrer">{emp.website}</a></td>
-                <td>{emp.contact}</td>
-                <td>
-                  {emp.verified ? (
-                    <span className="badge verified">✅ Verified</span>
-                  ) : emp.reported ? (
-                    <span className="badge reported">🚩 Reported</span>
-                  ) : (
-                    <span className="badge pending">⏳ Pending</span>
-                  )}
-                </td>
-                <td>
-                  <button onClick={() => handleVerify(emp._id)} className="btn-verify">Verify</button>
-                  <button onClick={() => handleReport(emp._id)} className="btn-report">Report</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {filteredEmployers.map(emp => (
+    <tr key={emp._id}>
+      <td>{emp.company}</td>
+      <td>{emp.email}</td>
+      <td>
+        <a href={emp.website} target="_blank" rel="noreferrer">{emp.website}</a>
+      </td>
+      <td>{emp.contact}</td>
+      <td>
+
+    {emp.status}
+  
+</td>
+
+
+      <td>
+        {/* You had this already: */}
+        <button onClick={() => handleVerify(emp._id)} className="btn-verify">Verify</button>
+        <button onClick={() => handleReport(emp._id)} className="btn-report">Report</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
         </table>
       )}
     </div>

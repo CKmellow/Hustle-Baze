@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { FaBell, FaCommentDots, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import './Topbar.css';
 
 const Topbar = ({ setActivePage, toggleSidebar, sidebarCollapsed }) => {
   const [fname, setFname] = useState('');
   const [email, setEmail] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -18,14 +21,24 @@ const Topbar = ({ setActivePage, toggleSidebar, sidebarCollapsed }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    setActivePage('Login');
+    if (setActivePage) {
+      setActivePage('Login'); // legacy dashboards
+    } else {
+      navigate('/login'); // react-router dashboards
+    }
   };
+
+  const goToProfile = () => {
+  if (typeof setActivePage === 'function') {
+    setActivePage('profile'); // for legacy dashboards using internal tab switch
+  } else {
+    navigate('/profile'); // for routers like CareerOfficerProfile
+  }
+};
 
   return (
     <header className="topbar">
-     
       <a href="/home" className="logo">Hustle Base</a>
-
 
       <div className="topbar-icons">
         <button className="icon-button" aria-label="Notifications">
@@ -36,16 +49,23 @@ const Topbar = ({ setActivePage, toggleSidebar, sidebarCollapsed }) => {
           <FaCommentDots />
           <span className="badge">5</span>
         </button>
+
         <div 
           className="profile-dropdown-container"
           onMouseEnter={() => setShowDropdown(true)}
           onMouseLeave={() => setShowDropdown(false)}
         >
-          <div className="profile-dropdown-trigger" tabIndex={0} aria-label="User Profile">
+          <div
+            className="profile-dropdown-trigger"
+            onClick={goToProfile}
+            tabIndex={0}
+            style={{ cursor: 'pointer' }}
+            aria-label="User Profile"
+          >
             <FaUserCircle className="profile-icon" />
             <span className="username">{fname} ▼</span>
           </div>
-          
+
           {showDropdown && (
             <div className="profile-dropdown-menu">
               <div className="dropdown-email">{email}</div>
@@ -56,7 +76,7 @@ const Topbar = ({ setActivePage, toggleSidebar, sidebarCollapsed }) => {
               <div className="dropdown-divider"></div>
               <button 
                 className="dropdown-item"
-                onClick={() => setActivePage('Profile')}
+                onClick={goToProfile}
               >
                 Profile
               </button>

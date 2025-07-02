@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ViewAnalytics from './ViewAnalytics';
 import CareerOfficerProfile from './CareerOfficerProfile';
 import VerifyOrganizations from './VerifyOrganizations';
+import ManageComments from './ManageComments';
+import ManageUsers from './ManageUsers.jsx';
 import Lottie from 'lottie-react';
 import pointerAnimation from '../animations/Alert.json';
 import Topbar from '../studview/Topbar';
@@ -63,6 +65,11 @@ useEffect(() => {
         return <CareerOfficerProfile />;
       case "verify":
         return <VerifyOrganizations />;
+        case "comments":
+  return <ManageComments />;
+   case "users":
+  return <ManageUsers />;
+
       default:
         return <p>Page not found.</p>;
     }
@@ -70,7 +77,8 @@ useEffect(() => {
 
   return (
     <div className="career-layout">
-      <Topbar />
+      <Topbar setActivePage={setActivePage} />
+
       <div className="career-dashboard">
         <aside className="sidebars">
           <h2>Career Portal</h2>
@@ -79,8 +87,8 @@ useEffect(() => {
               <li className={activePage === "dashboard" ? "active" : ""}>
                 <a onClick={() => setActivePage("dashboard")}><Home size={18} /> Dashboard</a>
               </li>
-              <li className={activePage === "profile" ? "active" : ""}>
-                <a onClick={() => setActivePage("profile")}><UserCircle size={18} /> My Profile</a>
+              <li className={activePage === "users" ? "active" : ""}>
+                <a onClick={() => setActivePage("users")}><UserCircle size={18} /> Manage users</a>
               </li>
               <li className={activePage === "verify" ? "active" : ""}>
                 <a onClick={() => setActivePage("verify")}><Users size={18} /> Verify Organizations</a>
@@ -88,6 +96,13 @@ useEffect(() => {
               <li className={activePage === "analytics" ? "active" : ""}>
                 <a onClick={() => setActivePage("analytics")}><BarChart2 size={18} /> Internship Analytics</a>
               </li>
+              <li className={activePage === "comments" ? "active" : ""}>
+            <a onClick={() => setActivePage("comments")}>
+              🗨️ Manage Comments
+            </a>
+          </li>
+           
+
               <li>
                 <a onClick={() => {
                   localStorage.clear();

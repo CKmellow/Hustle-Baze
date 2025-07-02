@@ -1388,13 +1388,26 @@ app.get('/api/applications/analytics', async (req, res) => {
 app.get('/api/employers', async (req, res) => {
   try {
     const db = await connectToDb();
-    const employers = await db.collection('Employer').find().toArray();
-    res.json(employers);
+    const employers = await db.collection('Employer')
+      .find({ company: { $exists: true } })
+      .toArray();
+
+    const employersWithStatus = employers.map(emp => {
+      let status = 'Pending';
+      if (emp.verified) status = 'Verified';
+      else if (emp.reported) status = 'Reported';
+      return { ...emp, status };
+    });
+
+    console.log("With status:", employersWithStatus); // Confirm here
+
+    res.json(employersWithStatus);
   } catch (error) {
     console.error("Error fetching employers:", error);
     res.status(500).json({ message: "Failed to fetch employers." });
   }
 });
+
 // career officer's profile
 app.get('/api/career-office/:staffId', async (req, res) => {
   const { userId } = req.params;
@@ -1735,11 +1748,32 @@ app.post('/api/comments', async (req, res) => {
   }
 
   try {
-    // Optionally: Check if the student has already commented
-    const existing = await commentsCollection.findOne({ internshipId, studentId });
+    const db = await connectToDb(); // ✅ Connect to DB
+    const Comments = db.collection('Comments'); // ✅ Comments collection
+    const Applications = db.collection('Applications'); // ✅ Applications collection
+
+    // ✅ Check if student has applied
+    const hasApplied = await Applications.findOne({
+      internshipID: new ObjectId(internshipId),
+      studentID: new ObjectId(studentId),
+    });
+
+    if (!hasApplied) {
+      return res.status(403).json({
+        error: 'You can only comment after applying for this internship.',
+      });
+    }
+
+    // ✅ Check if the student already commented
+    const existing = await Comments.findOne({
+      internshipId,
+      studentId,
+    });
 
     if (existing) {
-      return res.status(400).json({ error: 'You have already commented on this internship.' });
+      return res.status(400).json({
+        error: 'You have already commented on this internship.',
+      });
     }
 
     const newComment = {
@@ -1750,20 +1784,60 @@ app.post('/api/comments', async (req, res) => {
       createdAt: new Date(),
     };
 
-    const result = await commentsCollection.insertOne(newComment);
+    const result = await Comments.insertOne(newComment);
     res.status(201).json({ success: true, commentId: result.insertedId });
+
   } catch (err) {
     console.error('Comment insert error:', err);
     res.status(500).json({ error: 'Server error adding comment' });
   }
 });
+// Get all comments made by a specific student
+app.get('/api/comments/:studentId', async (req, res) => {
+  const studentId = req.params.studentId;
+
+  try {
+    const db = await connectToDb();
+    const Comments = db.collection('Comments');
+
+    const comments = await Comments.find({ studentId }).toArray();
+
+    res.json(comments);
+  } catch (err) {
+    console.error('Error fetching student comments:', err);
+    res.status(500).json({ error: 'Server error fetching comments' });
+  }
+});
+// Get a single comment by its commentId
+app.get('/api/comments/single/:commentId', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const Comments = db.collection('Comments');
+
+    const comment = await Comments.findOne({ _id: new ObjectId(req.params.commentId) });
+
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    res.json({ success: true, data: comment });
+  } catch (err) {
+    console.error('Error fetching comment:', err);
+    res.status(500).json({ error: 'Server error fetching comment' });
+  }
+});
+
 
 // Update an existing comment
+// Update a comment by its commentId
 app.put('/api/comments/:commentId', async (req, res) => {
   const { comment, rating } = req.body;
 
   try {
-    const result = await commentsCollection.updateOne(
+    const db = await connectToDb();
+    const Comments = db.collection('Comments');
+
+    const result = await Comments.updateOne(
       { _id: new ObjectId(req.params.commentId) },
       {
         $set: {
@@ -1785,6 +1859,134 @@ app.put('/api/comments/:commentId', async (req, res) => {
   }
 });
 
+
+app.delete('/api/comments/:commentId', async (req, res) => {
+  const commentId = req.params.commentId;
+
+  if (!ObjectId.isValid(commentId)) {
+    return res.status(400).json({ error: 'Invalid comment ID' });
+  }
+
+  try {
+    const db = await connectToDb(); // Ensure you have a working DB connection function
+    const result = await db.collection('Comments').deleteOne({ _id: new ObjectId(commentId) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    res.json({ success: true, message: 'Comment deleted successfully' });
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).json({ error: 'Server error deleting comment' });
+  }
+});
+// Check if a student has applied to any internship
+app.get('/api/applications/check/:studentId', async (req, res) => {
+  const db = await connectToDb();
+  const Applications = db.collection('Applications');
+
+  const studentObjectId = new ObjectId(req.params.studentId); // ✅ convert to ObjectId
+  const application = await Applications.findOne({ studentID: studentObjectId }); // ✅ case match
+
+  if (application) {
+    res.json({
+      hasApplied: true,
+      internshipId: application.internshipID,
+    });
+  } else {
+    res.json({ hasApplied: false });
+  }
+});
+
+// Get all comments (for admin moderation)
+app.get('/api/comments', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const comments = await db.collection("Comments").aggregate([
+      {
+        $lookup: {
+          from: "Students",               // your students collection name
+          localField: "studentId",        // field in Comments
+          foreignField: "_id",            // field in Students
+          as: "studentInfo"
+        }
+      },
+      {
+        $unwind: {
+          path: "$studentInfo",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          comment: 1,
+          rating: 1,
+          internshipId: 1,
+          createdAt: 1,
+          studentId: 1,
+          studentName: { 
+            $concat: ["$studentInfo.fname", " ", "$studentInfo.lname"] 
+          }
+        }
+      }
+    ]).toArray();
+
+    res.json({ success: true, data: comments });
+  } catch (err) {
+    console.error('Error fetching all comments:', err);
+    res.status(500).json({ success: false, error: 'Server error fetching comments' });
+  }
+});
+
+// admin delete comment by commentId
+app.delete('/api/comments/:commentId', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const result = await db.collection("Comments").deleteOne({ _id: new ObjectId(req.params.commentId) });
+    if (result.deletedCount === 1) {
+      res.json({ success: true, message: 'Comment deleted successfully' });
+    } else {
+      res.status(404).json({ success: false, message: 'Comment not found' });
+    }
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).json({ success: false, message: 'Server error deleting comment' });
+  }
+});
+//admin to view all users
+app.get('/api/users', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const users = await db.collection("users")
+      .find({ role: { $ne: "careerOfficer" } })
+      .project({ fname: 1, lname: 1, email: 1, role: 1 })
+      .toArray();
+
+    res.json({ success: true, data: users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, message: "Server error fetching users" });
+  }
+});
+//admin to delete all users
+app.delete('/api/users/:userId', async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const userId = req.params.userId;
+
+    const result = await db.collection("users").deleteOne({ _id: new ObjectId(userId) });
+
+    if (result.deletedCount === 1) {
+      res.json({ success: true, message: "User deleted successfully" });
+    } else {
+      res.status(404).json({ success: false, message: "User not found" });
+    }
+  } catch (error) {
+    console.error("Delete user error:", error);
+    res.status(500).json({ success: false, message: "Server error deleting user" });
+  }
+});
 
 
 // Start the server
