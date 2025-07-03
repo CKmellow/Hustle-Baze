@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import './ManageUsers.css'; // optional: for styling
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import './ManageUsers.css';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
@@ -51,25 +53,21 @@ const ManageUsers = () => {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
+
     doc.setFontSize(18);
     doc.text('User List Report', 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
 
     const tableColumn = ["First Name", "Last Name", "Email", "Role"];
-    const tableRows = [];
+    const tableRows = users.map(user => [
+      user.fname,
+      user.lname,
+      user.email,
+      user.role
+    ]);
 
-    users.forEach(user => {
-      const userData = [
-        user.fname,
-        user.lname,
-        user.email,
-        user.role
-      ];
-      tableRows.push(userData);
-    });
-
-    doc.autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 30
@@ -82,7 +80,9 @@ const ManageUsers = () => {
     <div className="manage-users">
       <div className="header-row">
         <h2>Manage Users</h2>
-        <button onClick={exportToPDF} className="btn-export">Export to PDF</button>
+        <button className="export-btn" onClick={exportToPDF}>
+          <FontAwesomeIcon icon={faDownload} /> Export PDF
+        </button>
       </div>
 
       <table>

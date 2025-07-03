@@ -7,6 +7,13 @@
   justify-content: center;
   align-items: center;
 }
+.manage-users .header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-right: 1rem;
+}
 
 .custom-modal {
   background: #fff;
@@ -51,4 +58,28 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+.manage-users .export-btn {
+  background-color: var(--color-5); /* A vibrant purple */
+  color: #fff;
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 1rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.manage-users .export-btn:hover {
+  background-color: var(--color-6); /* Slightly lighter tone */
+  transform: scale(1.05);
+}
+.manage-users .export-btn:active {
+  transform: scale(0.95);
 }
