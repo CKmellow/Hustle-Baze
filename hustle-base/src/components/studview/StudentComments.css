@@ -20,6 +20,13 @@
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
   position: relative;
 }
+.comment-form textarea{
+  width: 300px;
+}
+.comment-form h4{
+  padding: 10px;
+  font-size: 1.6rem;
+}
 
 .comment-text {
   font-size: 1.1rem;
