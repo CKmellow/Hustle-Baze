@@ -19,13 +19,10 @@ const Topbar = ({ setActivePage, toggleSidebar, sidebarCollapsed }) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    if (setActivePage) {
-      setActivePage('Login'); // legacy dashboards
-    } else {
-      navigate('/login'); // react-router dashboards
-    }
+    localStorage.clear();
+    sessionStorage.clear();
+      navigate('/home'); 
+    
   };
 
   const goToProfile = () => {
