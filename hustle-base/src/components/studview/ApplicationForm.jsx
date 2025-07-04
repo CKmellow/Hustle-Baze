@@ -12,7 +12,7 @@ const ApplicationForm = ({ setActivePage }) => {
     internship: internshipId || '',
     studentID: user?._id || '',
     // status: 'pending',
-    feedback: 'N/A',
+    feedback: 'pending',
     coverLetter: '',
     cv: '',
     applicationDate: new Date().toISOString(),
@@ -146,10 +146,10 @@ const ApplicationForm = ({ setActivePage }) => {
           )}
         </div>
 
-        <div className="form-group">
+        {/* <div className="form-group">
           <label>Additional Notes</label>
           <textarea name="feedback" value={formData.feedback} onChange={handleChange} rows="4" />
-        </div>
+        </div> */}
 
         <div className="form-actions">
           <button

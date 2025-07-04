@@ -497,7 +497,7 @@ app.get('/api/employers/:employerID/application-status-counts', authMiddleware, 
     res.status(200).json({
       success: true,
       applicationCounts: response,
-      internshipCount: internshipDocs.length // ✅ Include internship count
+      internshipCount: internshipDocs.length 
     });
   } catch (error) {
     console.error("Dashboard stats error:", error);
@@ -1810,7 +1810,7 @@ app.post('/api/forgot-password', async (req, res) => {
 
   const resetLink = `http://localhost:3000/reset-password/${token}`;
   // Send using nodemailer or Mailtrap
-  await sendEmail(user.email, "Reset Your Password", `Click to reset: ${resetLink}`);
+  await sendMail(user.email, "Reset Your Password", `Click to reset: ${resetLink}`);
 
   res.json({ message: "Reset link sent" });
 });
