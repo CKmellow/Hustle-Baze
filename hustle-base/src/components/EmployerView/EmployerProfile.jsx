@@ -8,10 +8,11 @@ const EmployerProfile = () => {
     fname: '',
     lname: '',
     email: '',
-    OrgName: '',
+    company: '',
     location: '',
-    phone: '',
+    contact: '',
     description: '',
+    website: '', // ✅ added website field
     requestVerification: false
   });
   const [successMsg, setSuccessMsg] = useState('');
@@ -82,8 +83,8 @@ const EmployerProfile = () => {
   return (
     <div className="max-w-xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Employer Profile</h2>
-      {successMsg && <div className="success-message">{successMsg}</div>}
-      {errorMsg && <div className="error-message">{errorMsg}</div>}
+      {successMsg && <div className="text-green-600">{successMsg}</div>}
+      {errorMsg && <div className="text-red-600">{errorMsg}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label>First Name</label>
@@ -101,8 +102,8 @@ const EmployerProfile = () => {
         </div>
 
         <div>
-          <label>Organization Name</label>
-          <input type="text" name="OrgName" value={form.OrgName} onChange={handleChange} className="w-full border p-2 rounded" required />
+          <label>Company</label>
+          <input type="text" name="company" value={form.company} onChange={handleChange} className="w-full border p-2 rounded" required />
         </div>
 
         <div>
@@ -111,13 +112,25 @@ const EmployerProfile = () => {
         </div>
 
         <div>
-          <label>Phone</label>
-          <input type="text" name="phone" value={form.phone} onChange={handleChange} className="w-full border p-2 rounded" />
+          <label>Contact</label>
+          <input type="text" name="contact" value={form.contact} onChange={handleChange} className="w-full border p-2 rounded" />
         </div>
 
         <div>
           <label>Description</label>
           <textarea name="description" value={form.description} onChange={handleChange} className="w-full border p-2 rounded" />
+        </div>
+
+        <div>
+          <label>Website</label>
+          <input
+            type="url"
+            name="website"
+            value={form.website}
+            onChange={handleChange}
+            placeholder="https://example.com"
+            className="w-full border p-2 rounded"
+          />
         </div>
 
         <div className="flex items-center">

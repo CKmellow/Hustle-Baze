@@ -114,6 +114,11 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
+// Verify if token is still valid
+app.get('/api/verify-token', authMiddleware, async (req, res) => {
+  return res.status(200).json({ success: true, message: 'Token is valid' });
+});
+
 // POST: Secure Login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -277,7 +282,7 @@ app.get('/verify-email', async (req, res) => {
 // Applications API Endpoints
 app.get('/api/applications', authMiddleware, async (req, res) => {
     try {
-        const { status, sortBy, search } = req.query;
+        const { feedback, sortBy, search } = req.query;
         const studentID = new ObjectId(req.user._id);
         
         const db = await connectToDb();
@@ -285,8 +290,8 @@ app.get('/api/applications', authMiddleware, async (req, res) => {
         
         let query = { studentID };
         
-        if (status && ['pending', 'accepted', 'rejected'].includes(status)) {
-            query.status = status;
+        if (feedback && ['pending', 'approved', 'rejected'].includes(feedback)) {
+            query.feedback = feedback;
         }
         
         if (search) {
@@ -427,12 +432,12 @@ app.get('/api/student/:studentID/application-status-counts', authMiddleware, asy
 
         const counts = await applicationsCollection.aggregate([
             { $match: { studentID } },
-            { $group: { _id: "$status", count: { $sum: 1 } } }
+            { $group: { _id: "$feedback", count: { $sum: 1 } } }
         ]).toArray();
 
         const response = {
             pending: 0,
-            accepted: 0,
+            approved: 0,
             rejected: 0,
             profileCompletion: 0, // You'll need to implement this
             alerts: [] // You'll need to implement this
@@ -473,12 +478,12 @@ app.get('/api/employers/:employerID/application-status-counts', authMiddleware, 
     const applicationsCollection = db.collection("Applications");
     const counts = await applicationsCollection.aggregate([
       { $match: { internshipID: { $in: internshipIds } } },
-      { $group: { _id: "$status", count: { $sum: 1 } } }
+      { $group: { _id: "$feedback", count: { $sum: 1 } } }
     ]).toArray();
 
     const response = {
       pending: 0,
-      accepted: 0,
+      approved: 0,
       rejected: 0
     };
 
@@ -502,9 +507,9 @@ app.get('/api/employers/:employerID/application-status-counts', authMiddleware, 
 
 
 // Get all internships with filters
-app.get('/api/internships', async (req, res) => {
+app.get('/api/filter/internships', async (req, res) => {
   try {
-    const { title, location, orgName, deadline } = req.query;
+    const { title, location, company, deadline } = req.query;
     const db = await connectToDb();
     const internshipsCollection = db.collection("Internships");
 
@@ -518,8 +523,8 @@ app.get('/api/internships', async (req, res) => {
       query.location = { $regex: location, $options: 'i' };
     }
 
-    if (orgName) {
-      query.orgName = { $regex: orgName, $options: 'i' };
+    if (company) {
+      query.company = { $regex: company, $options: 'i' };
     }
 
     if (deadline) {
@@ -556,43 +561,195 @@ app.post('/api/upload', upload.fields([
 
 
 // Create new application
-app.post('/api/applications', authMiddleware, async (req, res) => {
+app.post('/api/create/applications', authMiddleware, async (req, res) => {
+  try {
+    const db = await connectToDb();
+    const Applications = db.collection('Applications');
+    const Users = db.collection('Users');
+
+    const {
+      internship,
+      coverLetter,
+      cv,
+      feedback = 'pending',
+      applicationDate = new Date().toISOString()
+    } = req.body;
+
+    if (!internship || !coverLetter || !cv) {
+      return res.status(400).json({ message: 'Internship, CV, and Cover Letter are required' });
+    }
+
+    const existing = await Applications.findOne({
+      studentID: new ObjectId(req.user._id),
+      internshipID: new ObjectId(internship)
+    });
+
+    if (existing) {
+      return res.status(409).json({ message: 'You have already applied for this internship' });
+    }
+
+    const newApplication = {
+      internshipID: new ObjectId(internship),
+      studentID: new ObjectId(req.user._id),
+      feedback,
+      coverLetter,
+      cv,
+      applicationDate: new Date(applicationDate),
+      createdAt: new Date()
+    };
+
+    const result = await Applications.insertOne(newApplication);
+
+    // Fetch user to get their email
+    const student = await Users.findOne({ _id: new ObjectId(req.user._id) });
+
+    if (student?.email) {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: student.email,
+        subject: 'Internship Application Confirmation',
+        html: `
+          <h2>Application Submitted Successfully 🎉</h2>
+          <p>Hello ${student.fname || 'Student'},</p>
+          <p>Thank you for applying for the internship. Your application has been received and is under review.</p>
+          <p><strong>Internship ID:</strong> ${internship}</p>
+          <p><strong>Application Date:</strong> ${new Date(applicationDate).toLocaleDateString()}</p>
+          <br>
+          <p>Best regards,</p>
+          <p>HustleBase Team</p>
+        `
+      });
+    }
+
+    res.status(201).json({ message: 'Application submitted and confirmation email sent.', applicationId: result.insertedId });
+  } catch (err) {
+    console.error('Error submitting application:', err);
+    res.status(500).json({ message: 'Failed to submit application' });
+  }
+});
+
+// app.post('/api/create/applications', authMiddleware, async (req, res) => {
+//   try {
+//     const db = await connectToDb();
+//     const Applications = db.collection('Applications');
+
+//     const {
+//       internship,       
+//       coverLetter,      
+//       cv,               
+//       feedback = 'pending',
+//       // status = 'pending',
+//       applicationDate = new Date().toISOString()
+//     } = req.body;
+
+//     if (!internship || !coverLetter || !cv) {
+//       return res.status(400).json({ message: 'Internship, CV, and Cover Letter are required' });
+//     }
+
+//     // Check if already applied
+//     const existing = await Applications.findOne({
+//       studentID: new ObjectId(req.user._id),
+//       internshipID: new ObjectId(internship)
+//     });
+
+//     if (existing) {
+//       return res.status(409).json({ message: 'You have already applied for this internship' });
+//     }
+
+//     const newApplication = {
+//       internshipID: new ObjectId(internship),
+//       studentID: new ObjectId(req.user._id),
+//       //status,
+//       feedback,
+//       coverLetter,
+//       cv,
+//       applicationDate: new Date(applicationDate),
+//       createdAt: new Date()
+//     };
+
+//     const result = await Applications.insertOne(newApplication);
+//     res.status(201).json({ message: 'Application submitted successfully', applicationId: result.insertedId });
+//   } catch (err) {
+//     console.error('Error submitting application:', err);
+//     res.status(500).json({ message: 'Failed to submit application' });
+//   }
+// });
+
+app.get('/api/fetch/applications', authMiddleware, async (req, res) => {
   try {
     const db = await connectToDb();
     const applicationsCollection = db.collection("Applications");
-    
-    // Verify the internship exists
-    const internshipsCollection = db.collection("Internships");
-    const internship = await internshipsCollection.findOne({ 
-      _id: new ObjectId(req.body.internship) 
-    });
-    
-    if (!internship) {
-      return res.status(404).json({ message: 'Internship not found' });
-    }
-    
-    const application = {
-      internshipID: new ObjectId(req.body.internship),
-      studentID: new ObjectId(req.user._id),
-      status: req.body.status || 'pending',
-      feedback: req.body.feedback || 'N/A',
-      coverLetter: req.body.coverLetter,
-      cv: req.body.cv,
-      applicationDate: new Date(req.body.applicationDate || Date.now()),
-      createdAt: new Date()
+
+    const { search, feedback, sortBy } = req.query;
+
+    const matchStage = {
+      studentID: new ObjectId(req.user._id)
     };
-    
-    const result = await applicationsCollection.insertOne(application);
-    
-    res.status(201).json({
-      message: 'Application submitted successfully',
-      applicationId: result.insertedId
-    });
+
+    if (feedback) {
+      matchStage.feedback = feedback;
+    }
+
+    const pipeline = [
+      { $match: matchStage },
+
+      {
+        $lookup: {
+          from: "Internships",
+          localField: "internshipID",
+          foreignField: "_id",
+          as: "internship"
+        }
+      },
+      {
+        $unwind: {
+          path: "$internship",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+      // Optional text search on internship title/company
+      ...(search
+        ? [{
+            $match: {
+              $or: [
+                { "internship.title": { $regex: search, $options: "i" } },
+                { "internship.company": { $regex: search, $options: "i" } }
+              ]
+            }
+          }]
+        : []
+      ),
+
+      {
+        $project: {
+          cv: 1,
+          coverLetter: 1,
+          feedback: 1,
+          createdAt: 1,
+          internship: {
+            title: 1,
+            company: 1,
+            deadline: 1
+          }
+        }
+      },
+
+      {
+        $sort: {
+          createdAt: sortBy === 'oldest' ? 1 : -1
+        }
+      }
+    ];
+
+    const applications = await applicationsCollection.aggregate(pipeline).toArray();
+    res.json(applications);
   } catch (err) {
-    console.error("Error creating application:", err);
-    res.status(500).json({ message: "Failed to submit application" });
+    console.error("Error fetching applications:", err);
+    res.status(500).json({ message: "Failed to fetch applications" });
   }
 });
+
 
 // // Get ALL internships (no filters)
 // app.get('/api/internships', async (req, res) => {
@@ -881,9 +1038,9 @@ app.get('/api/employers/:id/completion', authMiddleware, async (req, res) => {
       });
     }
 
-    // Profile completeness fields
-    const requiredFields = ['OrgName'];
-    const optionalFields = ['location', 'phone', 'description', 'requestVerification'];
+    // ✅ Corrected field names
+    const requiredFields = ['company'];
+    const optionalFields = ['location', 'contact', 'description', 'website', 'requestVerification'];
 
     let score = 0;
     const missingFields = {
@@ -903,7 +1060,7 @@ app.get('/api/employers/:id/completion', authMiddleware, async (req, res) => {
     // Evaluate optional fields
     optionalFields.forEach(field => {
       if (
-        typeof employer[field] === 'boolean' || 
+        typeof employer[field] === 'boolean' ||
         (employer[field] && String(employer[field]).trim() !== '')
       ) {
         score += 0.5;
@@ -937,6 +1094,7 @@ app.get('/api/employers/:id/completion', authMiddleware, async (req, res) => {
     });
   }
 });
+
 
 // creating the admin table
 
@@ -974,18 +1132,19 @@ app.put('/api/employers/:id', authMiddleware, async (req, res) => {
   const {
     fname,
     lname,
-    OrgName,
+    company,
     location,
-    phone,
+    contact,
     description,
+    website, // ✅ added
     requestVerification
   } = req.body;
 
-  if (!OrgName) {
+  if (!company) {
     return res.status(400).json({
       success: false,
       message: 'Organization Name is required',
-      missingFields: { required: ['OrgName'] }
+      missingFields: { required: ['company'] }
     });
   }
 
@@ -1000,10 +1159,11 @@ app.put('/api/employers/:id', authMiddleware, async (req, res) => {
     { _id: new ObjectId(employerId) },
     {
       $set: {
-        OrgName,
+        company,
         location,
-        phone,
+        contact,
         description,
+        website, // ✅ stored
         requestVerification: !!requestVerification,
         updatedAt: new Date()
       }
@@ -1022,6 +1182,7 @@ app.put('/api/employers/:id', authMiddleware, async (req, res) => {
 
   res.json({ success: true, message: 'Profile updated successfully' });
 });
+
 
 // GET internships by employer ID
 app.get('/api/employers/:id/internships', authMiddleware, async (req, res) => {
@@ -1248,75 +1409,17 @@ app.put('/api/applications/:id/feedback', async (req, res) => {
   res.status(200).json({ message: 'Feedback updated' });
 });
 
-app.get('/api/internships/:id/download-all', async (req, res) => {
-  const internshipId = req.params.id;
-
-  try {
-    const db = await connectToDb();
-
-    const applications = await db.collection('Applications').aggregate([
-      { $match: { internshipID: new ObjectId(internshipId) } },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'studentID',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      { $unwind: '$user' }
-    ]).toArray();
-
-    if (!applications.length) {
-      return res.status(404).send('No applications found.');
-    }
-
-    // Set zip headers
-    res.set({
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="applications_${internshipId}.zip"`
-    });
-
-    const archive = archiver('zip');
-    archive.pipe(res); // Stream to response
-
-    for (const app of applications) {
-      const { fname, lname } = app.user;
-      const name = `${fname}_${lname}`.replace(/\s+/g, '_');
-
-      // Add CV if exists
-      if (app.cv) {
-        const cvPath = path.join(__dirname, app.cv); // assuming cv = 'uploads/filename.pdf'
-        if (fs.existsSync(cvPath)) {
-          archive.file(cvPath, { name: `${name}_CV.pdf` });
-        }
-      }
-
-      // Add Cover Letter if exists
-      if (app.coverLetter) {
-        const coverPath = path.join(__dirname, app.coverLetter);
-        if (fs.existsSync(coverPath)) {
-          archive.file(coverPath, { name: `${name}_CoverLetter.pdf` });
-        }
-      }
-    }
-
-    archive.finalize();
-  } catch (err) {
-    console.error('Download-all error:', err);
-    res.status(500).send('Internal server error');
-  }
-});
 
 
 
 
 
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
+
+// // Start the server
+// app.listen(port, () => {
+//     console.log(`Server running on http://localhost:${port}`);
+// });
 
 
 
@@ -1692,6 +1795,7 @@ app.get('/api/alerts', async (req, res) => {
 //forgot password
 app.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
+  const db = await connectToDb();
   const user = await db.collection('Users').findOne({ email });
   if (!user) return res.status(404).json({ message: "Email not found" });
 
@@ -1996,40 +2100,40 @@ app.listen(port, () => {
 
 
 
-async function insertCareerOfficerManually() {
-  const { ObjectId } = require('mongodb');
-  // const bcrypt = require('bcrypt');
-  const db = await connectToDb();
+// async  insertCareerOfficerManually() {
+//   const { ObjectId } = require('mongodb');
+//   // const bcrypt = require('bcrypt');
+//   const db = await connectToDb();
 
-  const staffUserId = new ObjectId();
-  const hashedPassword = await bcrypt.hash("123", 10); // change as needed
+//   const staffUserId = new ObjectId();
+//   const hashedPassword = await bcrypt.hash("123", 10); // change as needed
 
-  // Insert into Users collection
-  await db.collection('users').insertOne({
-    _id: staffUserId,
-    fname: "cyp",
-    lname: "cyp",
-    email: "cyprian.kamau@strathmore.edu",
-    password: hashedPassword,
-    role: "careerOfficer",
-    verified: true,
-    createdAt: new Date()
-  });
+//   // Insert into Users collection
+//   await db.collection('users').insertOne({
+//     _id: staffUserId,
+//     fname: "cyp",
+//     lname: "cyp",
+//     email: "cyprian.kamau@strathmore.edu",
+//     password: hashedPassword,
+//     role: "careerOfficer",
+//     verified: true,
+//     createdAt: new Date()
+//   });
 
-  // Insert into CareerOffice collection
-  await db.collection('careerOffice').insertOne({
-    StaffID: "CO001",
-    userID: staffUserId,
-    Name: "Paul Macharia",
-    OrgName: "Strathmore University",
-    Phone: "0712345678",
-    Email: "pmacharia@strathmore.edu",
-    description: "Handles all student internship verification."
-  });
+//   // Insert into CareerOffice collection
+//   await db.collection('careerOffice').insertOne({
+//     StaffID: "CO001",
+//     userID: staffUserId,
+//     Name: "Paul Macharia",
+//     OrgName: "Strathmore University",
+//     Phone: "0712345678",
+//     Email: "pmacharia@strathmore.edu",
+//     description: "Handles all student internship verification."
+//   });
 
-  console.log("✅ Career Officer added successfully.");
-  process.exit(); // stop server after insert
-}
+//   console.log("✅ Career Officer added successfully.");
+//   process.exit(); // stop server after insert
+// }
 // view analytics
 
 
@@ -2233,7 +2337,7 @@ async function insertCareerOfficerManually() {
 //       {
 //         studentId: studentUserId,
 //         internshipId: internshipIds[2],
-//         status: 'accepted',
+//         status: 'approved',
 //         appliedAt: new Date()
 //       }
 //     ]);

@@ -30,18 +30,43 @@ const RoleRedirector = () => {
     const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-    if (token && user) {
-      if (user.role === 'student') {
-        navigate('/student');
-      } else if (user.role === 'employer') {
-        navigate('/employer');
-      } else if (user.role === 'CareerOfficer') {
-        navigate('/career-dashboard');
+    const validateToken = async () => {
+      if (!user || !token) {
+        return navigate("/login");
       }
-    }
+
+      try {
+        const res = await fetch("http://localhost:5000/api/verify-token", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          // Token expired or invalid
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          return navigate("/login");
+        }
+
+        // Valid token — redirect by role
+        if (user.role === 'student') {
+          navigate('/student');
+        } else if (user.role === 'employer') {
+          navigate('/employer');
+        } else if (user.role === 'CareerOfficer') {
+          navigate('/career-dashboard');
+        }
+      } catch (err) {
+        console.error("Token validation failed:", err);
+        navigate("/login");
+      }
+    };
+
+    validateToken();
   }, [navigate]);
 
-  return <HomePage />; // fallback UI if no user
+  return <HomePage />;
 };
 
 const AppRouter = () => {

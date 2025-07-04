@@ -1,12 +1,13 @@
-/* ===== Internships Page Styling ===== */
-
-/* Grid layout with 4 columns */
-.internship-wrapper {
-  padding: 2rem;
+/* ===== Global Wrapper ===== */
+.internship-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: Arial, sans-serif;
   background-color: #f9fafb;
-  min-height: 100vh;
 }
 
+/* ===== Header ===== */
 .internship-header {
   display: flex;
   justify-content: space-between;
@@ -20,38 +21,40 @@
   font-weight: 600;
 }
 
+/* ===== Create Button ===== */
 .create-button {
-  background-color: #3b82f6;
+  background-color: #2563eb;
   color: white;
-  border: none;
   padding: 0.6rem 1.2rem;
   font-weight: 600;
   border-radius: 0.5rem;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
   font-size: 0.95rem;
+  transition: background-color 0.2s ease-in-out;
 }
 
-.create-btn:hover {
-  background-color: #2563eb;
+.create-button:hover {
+  background-color: #1d4ed8;
 }
 
+/* ===== Internship Grid ===== */
 .internship-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
 }
 
+/* ===== Internship Card ===== */
 .internship-card {
-  background-color: #ffffff;
-  border-left: 4px solid #3b82f6;
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease-in-out;
+  background-color: #fff;
+  border-left: 4px solid #2563eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  max-height: 230px;
-  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+  min-height: 160px;
 }
 
 .internship-card:hover {
@@ -59,165 +62,168 @@
 }
 
 .internship-card h3 {
-  margin-bottom: 0.4rem;
+  font-size: 1rem;
   color: #1f2937;
-  font-size: 1.1rem;
   font-weight: 600;
+  margin-bottom: 0.3rem;
 }
 
 .internship-card p {
-  font-size: 0.9rem;
-  color: #4b5563;
-  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #374151;
+  margin: 0.15rem 0;
 }
 
-/* Modal form wrapper */
-.internship-modal {
-  background: #fff;
-  padding: 2rem;
+/* ===== Modal Overlay ===== */
+.internship-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 600px;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 20;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
 }
 
-/* Close button */
+/* ===== Modal Window ===== */
+.internship-modal {
+  background-color: #fff;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Close Button ===== */
 .modal-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: transparent;
-  border: none;
   font-size: 1.5rem;
+  background: none;
+  border: none;
   cursor: pointer;
 }
 
-/* Form input styles */
+/* ===== Modal Form ===== */
 form input,
 form textarea,
 form select {
   width: 100%;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  font-family: 'Segoe UI', sans-serif;
-  transition: border-color 0.2s;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  font-family: Arial, sans-serif;
+  transition: border-color 0.2s ease-in-out;
 }
 
 form input:focus,
 form textarea:focus,
 form select:focus {
-  border-color: #1e90ff;
+  border-color: #2563eb;
   outline: none;
 }
 
-/* Textarea */
 form textarea {
   min-height: 100px;
   resize: vertical;
 }
 
+/* ===== Submit Button ===== */
+form .create-button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+form .create-button:hover {
+  background-color: #1e40af;
+}
+
+/* ===== Modal Actions ===== */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+/* ===== Action Buttons ===== */
+.edit-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.delete-btn {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
+}
+
 .view-applications-btn {
   background-color: #10b981;
   color: white;
-  border: none;
   padding: 0.5rem 1rem;
-  font-weight: 600;
-  font-size: 0.9rem;
   border-radius: 6px;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
 .view-applications-btn:hover {
   background-color: #059669;
 }
 
-
-/* Submit Button */
-form .create-button {
-  background-color: #1e90ff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+/* ===== Verification Tag ===== */
+.verified {
+  color: green;
+  font-weight: bold;
 }
 
-form .create-button:hover {
-  background-color: #1673cc;
+.not-verified {
+  color: red;
+  font-weight: bold;
 }
 
-/* Optional: Label styling if you add labels */
-form label {
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-  display: block;
-  color: #333;
-}
-
-/* Dropdowns (selects) */
-form select {
-  background-color: #fff;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='5' viewBox='0 0 10 5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23999' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 10px 5px;
-}
-
-/* Modal overlay */
-.internship-modal-overlay {
-  background: rgba(0, 0, 0, 0.6);
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-.view-btn {
-  background-color: #2563eb;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.view-btn:hover {
-  background-color: #1d4ed8;
-}
-
-.internship-modal-overlay {
-  z-index: 40; /* Should be BELOW the HeadlessUI Dialog (z-50) */
-}
-
-/* ===== Applications Modal ===== */
-
+/* ===== Applications Modal (separate file uses this too) ===== */
 .applications-modal-panel {
   background-color: #ffffff;
   border-radius: 0.75rem;
   padding: 1.5rem;
   width: 100%;
-  max-width: 96%;
+  max-width: 95%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 50;
-  border: 2px dashed red;
+  font-family: Arial, sans-serif;
 }
 
 .applications-modal-table {
@@ -229,7 +235,7 @@ form select {
 
 .applications-modal-table th,
 .applications-modal-table td {
-  border: 1px solid #ddd;
+  border: 1px solid #d1d5db;
   padding: 0.6rem 0.8rem;
   text-align: left;
 }
@@ -237,7 +243,7 @@ form select {
 .applications-modal-table th {
   background-color: #f3f4f6;
   font-weight: 600;
-  color: #1f2937;
+  color: #111827;
 }
 
 .applications-modal-table td {
@@ -253,6 +259,7 @@ form select {
   width: 100%;
 }
 
+/* ===== Applications Modal Buttons ===== */
 .download-all-btn {
   background-color: #1e3a8a;
   color: white;
