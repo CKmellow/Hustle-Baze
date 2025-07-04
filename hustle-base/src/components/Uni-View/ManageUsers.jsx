@@ -3,10 +3,13 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faUserCheck } from '@fortawesome/free-solid-svg-icons';
 import './ManageUsers.css';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedRole, setSelectedRole] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -15,11 +18,21 @@ const ManageUsers = () => {
       .then(res => res.json())
       .then(response => {
         if (response.success) {
-          setUsers(response.data.filter(u => u.role !== 'careerOfficer'));
+          const filtered = response.data.filter(u => u.role !== 'careerOfficer');
+          setUsers(filtered);
+          setFilteredUsers(filtered); // default display all
         }
       })
       .catch(err => console.error("Failed to fetch users:", err));
   }, []);
+
+  const handleRoleChange = (e) => {
+    const role = e.target.value;
+    setSelectedRole(role);
+    setFilteredUsers(
+      role ? users.filter(user => user.role === role) : users
+    );
+  };
 
   const openModal = (user) => {
     setSelectedUser(user);
@@ -39,7 +52,13 @@ const ManageUsers = () => {
       const data = await res.json();
 
       if (data.success) {
-        setUsers(prev => prev.filter(user => user._id !== selectedUser._id));
+        const updatedUsers = users.filter(user => user._id !== selectedUser._id);
+        setUsers(updatedUsers);
+        setFilteredUsers(
+          selectedRole
+            ? updatedUsers.filter(user => user.role === selectedRole)
+            : updatedUsers
+        );
       } else {
         alert(data.message || "Failed to delete user.");
       }
@@ -53,14 +72,13 @@ const ManageUsers = () => {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-
     doc.setFontSize(18);
     doc.text('User List Report', 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
 
     const tableColumn = ["First Name", "Last Name", "Email", "Role"];
-    const tableRows = users.map(user => [
+    const tableRows = filteredUsers.map(user => [
       user.fname,
       user.lname,
       user.email,
@@ -73,13 +91,24 @@ const ManageUsers = () => {
       startY: 30
     });
 
-    doc.save('user_list.pdf');
+    doc.save(`user_list_${selectedRole || 'all'}.pdf`);
   };
 
   return (
     <div className="manage-users">
       <div className="header-row">
         <h2>Manage Users</h2>
+        <div className="filter-container">
+          <label htmlFor="role-filter">
+    <FontAwesomeIcon icon={faUserCheck} style={{ marginRight: '6px' }} />
+    Filter by Role:
+  </label>
+          <select id="roleFilter" value={selectedRole} onChange={handleRoleChange}>
+            <option value="">All</option>
+            <option value="student">Student</option>
+            <option value="employer">Employer</option>
+          </select>
+        </div>
         <button className="export-btn" onClick={exportToPDF}>
           <FontAwesomeIcon icon={faDownload} /> Export PDF
         </button>
@@ -96,7 +125,7 @@ const ManageUsers = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
+          {filteredUsers.map(user => (
             <tr key={user._id}>
               <td>{user.fname}</td>
               <td>{user.lname}</td>

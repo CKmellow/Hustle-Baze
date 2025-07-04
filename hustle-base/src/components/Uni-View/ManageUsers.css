@@ -83,3 +83,31 @@
 .manage-users .export-btn:active {
   transform: scale(0.95);
 }
+.filter-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filter-container label {
+  font-weight: 500;
+}
+.roleFilter {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1.4rem;
+  background-color: #f9f9f9;
+  color: #333;
+}
+#roleFilter {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1.2rem;
+  background-color: #f9f9f9;
+  color: #333;
+}
