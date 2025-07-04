@@ -16,6 +16,7 @@ import ForgotPassword from '../ForgotPassword';
 import ResetPassword from '../ResetPassword';
 import AvailableInternships from '../AvailableInternships'; // adjust path if needed
 import ManageUsers from '../Uni-View/ManageUsers';
+import PostJob from '../PostJob';
 
 
 
@@ -92,6 +93,7 @@ const AppRouter = () => {
           
           <Route path="/profile" element={<CareerOfficerProfile />} />
           <Route path="/users" element={<ManageUsers />} />
+          <Route path="/postJob" element={<PostJob />} />
           <Route path="/internships" element={<AvailableInternships />} />
           <Route path="/verify-organizations" element={<VerifyOrgLayout />} />
           <Route path="/analytics-dashboard" element={<AnalyticsLayout />} />

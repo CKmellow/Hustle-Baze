@@ -1,0 +1,78 @@
+.post-job-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4rem 5%;
+  background: linear-gradient(135deg, var(--color-8), var(--color-6));
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(58, 12, 163, 0.15);
+  color: white;
+  margin: 3rem 0;
+}
+
+.text-content {
+  flex: 1;
+  max-width: 50%;
+}
+
+.text-content h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-5);
+  margin-bottom: 1rem;
+}
+
+.text-content p {
+  font-size: 1.7rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+
+.text-content p svg {
+  color: var(--color-1);
+  margin-right: 8px;
+}
+
+.post-job-btn {
+  background-color: var(--color-1);
+  border: none;
+  color: white;
+  padding: 14px 26px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 6px 16px rgba(247, 37, 133, 0.3);
+}
+
+.post-job-btn:hover {
+  background-color: var(--color-2);
+  transform: translateY(-3px);
+}
+
+.animation-container {
+  flex: 1;
+  max-width: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .post-job-section {
+    flex-direction: column-reverse;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .text-content,
+  .animation-container {
+    max-width: 100%;
+  }
+
+  .animation-container {
+    margin-bottom: 2rem;
+  }
+}

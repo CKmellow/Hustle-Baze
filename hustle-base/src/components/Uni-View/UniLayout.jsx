@@ -107,7 +107,7 @@ useEffect(() => {
                 <a onClick={() => {
                   localStorage.clear();
                   sessionStorage.clear();
-                  navigate('/login');
+                  navigate('/home');
                 }}><LogOut size={18} /> Logout</a>
               </li>
             </ul>

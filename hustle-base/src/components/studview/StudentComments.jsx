@@ -154,7 +154,7 @@ const StudentComments = () => {
           </div>
         ) : (
           <div className="no-comments">
-            You haven’t commented on any internship yet.
+            You haven’t submitted a comment yet.
             <br />
             Submit an application first to leave a comment.
           </div>

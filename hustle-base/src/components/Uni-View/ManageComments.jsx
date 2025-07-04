@@ -57,7 +57,7 @@ const ManageComments = () => {
           <thead>
             <tr>
               <th>Internship ID</th>
-              <th>Student Name</th>
+              <th>Student ID</th>
               <th>Comment</th>
               <th>Rating</th>
               <th>Posted At</th>
@@ -68,7 +68,7 @@ const ManageComments = () => {
             {comments.map(comment => (
               <tr key={comment._id}>
                 <td>{comment.internshipId}</td>
-                 <td>{comment.studentName || "Unknown"}</td>
+                 <td>{comment.studentID || "Unknown"}</td>
                 <td>{comment.comment}</td>
                 <td>{comment.rating ?? '-'}</td>
                 <td>{new Date(comment.createdAt).toLocaleString()}</td>

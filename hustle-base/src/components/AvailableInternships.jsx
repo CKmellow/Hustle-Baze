@@ -51,17 +51,20 @@ const AvailableInternships = () => {
 
 
 
-  const handleApplyClick = (internshipId) => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
+  // const handleApplyClick = (internshipId) => {
+  //   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  //   const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
 
-    if (!token || !user || user.role !== 'student') {
-      localStorage.setItem('redirectAfterLogin', `/student/apply/${internshipId}`);
-      navigate('/login');
-    } else {
-      navigate(`/student/apply/${internshipId}`);
-    }
-  };
+  //   if (!token || !user || user.role !== 'student') {
+  //     localStorage.setItem('redirectAfterLogin', `/student/apply/${internshipId}`);
+  //     navigate('/login');
+  //   } else {
+  //     navigate(`/student/apply/${internshipId}`);
+  //   }
+  // };
+  const handleApplyClick = () => {
+  navigate('/login');
+};
 
   const handleFilterChange = (key, value) => {
     const updated = { ...selectedFilters };

@@ -16,9 +16,11 @@ const Topbar = ({ setActivePage, toggleSidebar, sidebarCollapsed }) => {
   }, []);
 
   const handleLogout = () => {
+
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setActivePage('Login');
+
   };
 
   return (
