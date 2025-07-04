@@ -1,28 +1,32 @@
 .applications-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
 }
 
 .applications-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   margin-bottom: 2rem;
 }
 
 .applications-header h1 {
   font-size: 2rem;
-  color: #2d3748;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
 }
 
 .new-application-btn {
   background-color: #4f46e5;
-  color: white;
-  padding: 0.75rem 1.5rem;
+  color: #fff;
+  padding: 0.7rem 1.4rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -43,14 +47,15 @@
 .filters-container select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e0;
   border-radius: 6px;
   font-size: 1rem;
+  background-color: #fff;
 }
 
 .applications-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
 }
 
@@ -58,35 +63,36 @@
 .application-row {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   align-items: center;
   gap: 1rem;
 }
 
 .grid-header {
   padding: 1rem;
-  background-color: #f7fafc;
+  background-color: #edf2f7;
   font-weight: 600;
+  color: #2d3748;
   border-bottom: 2px solid #e2e8f0;
   border-radius: 6px;
 }
 
 .application-row {
   padding: 1rem;
-  border: 1px solid #edf2f7;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  background-color: #fff;
+  background-color: #ffffff;
   transition: box-shadow 0.2s ease;
 }
 
 .application-row:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .documents-column {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .icon-button {
@@ -96,8 +102,8 @@
   background: none;
   border: none;
   color: #4f46e5;
-  cursor: pointer;
   font-size: 0.875rem;
+  cursor: pointer;
   padding: 0;
   transition: color 0.2s ease;
 }
@@ -125,19 +131,22 @@
   text-align: center;
   padding: 2rem;
   color: #718096;
+  background-color: #fef9f9;
+  border: 1px dashed #e2e8f0;
+  border-radius: 6px;
 }
 
 .loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
+  height: 180px;
 }
 
 .loading-spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
   border-top: 4px solid #4f46e5;
+  border-radius: 50%;
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
@@ -152,28 +161,49 @@
   text-align: center;
   padding: 2rem;
   background-color: #fee2e2;
+  border: 1px solid #fecaca;
   border-radius: 8px;
   margin: 2rem 0;
 }
 
 .error-message {
-  color: #dc2626;
+  color: #b91c1c;
   margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 .retry-button {
   background-color: #4f46e5;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
-/* Status badges */
-.bg-yellow-100 { background-color: #fef9c3; }
+.retry-button:hover {
+  background-color: #4338ca;
+}
+
+/* feedback badges */
+.bg-yellow-100 { background-color: #fefcbf; }
 .text-yellow-800 { color: #92400e; }
-.bg-green-100 { background-color: #dcfce7; }
-.text-green-800 { color: #166534; }
+.bg-green-100 { background-color: #d1fae5; }
+.text-green-800 { color: #065f46; }
 .bg-red-100 { background-color: #fee2e2; }
 .text-red-800 { color: #991b1b; }
+
+/* Responsive tweaks */
+@media (max-width: 1024px) {
+  .applications-grid,
+  .grid-header,
+  .application-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filters-container {
+    grid-template-columns: 1fr;
+  }
+}

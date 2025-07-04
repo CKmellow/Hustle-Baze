@@ -14,7 +14,7 @@ const StudentDash = ({ setActivePage }) => {
     },
     applicationCounts: {
       pending: 0,
-      accepted: 0,
+      approved: 0,
       rejected: 0
     },
     alerts: [],
@@ -42,7 +42,7 @@ const StudentDash = ({ setActivePage }) => {
         }).catch(err => ({ 
           data: { 
             pending: 0, 
-            accepted: 0, 
+            approved: 0, 
             rejected: 0, 
             alerts: [] 
           } 
@@ -68,7 +68,7 @@ const StudentDash = ({ setActivePage }) => {
           { required: [], optional: [] },
         applicationCounts: {
           pending: countsResponse.data.pending || 0,
-          accepted: countsResponse.data.accepted || 0,
+          approved: countsResponse.data.approved || 0,
           rejected: countsResponse.data.rejected || 0
         },
         alerts: countsResponse.data.alerts || [],
@@ -191,9 +191,9 @@ const StudentDash = ({ setActivePage }) => {
           <p className="card-stat">{dashboardData.applicationCounts.pending}</p>
           <p className="card-subtext">Applications under review</p>
         </div>
-        <div className="dashboard-card tile accepted">
-          <h4 className="card-title">Accepted Applications</h4>
-          <p className="card-stat">{dashboardData.applicationCounts.accepted}</p>
+        <div className="dashboard-card tile approved">
+          <h4 className="card-title">approved Applications</h4>
+          <p className="card-stat">{dashboardData.applicationCounts.approved}</p>
           <p className="card-subtext">Successful applications</p>
         </div>
         <div className="dashboard-card tile rejected">
