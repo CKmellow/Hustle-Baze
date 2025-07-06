@@ -8,6 +8,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const { Readable } = require('stream');
+const axios = require('axios');
 
 
 const storage = multer.diskStorage({
@@ -418,44 +419,48 @@ app.delete('/api/applications/:id', authMiddleware, async (req, res) => {
 });
 
 
+
+
 // Get application status counts
 app.get('/api/student/:studentID/application-status-counts', authMiddleware, async (req, res) => {
+  try {
     const studentID = new ObjectId(req.params.studentID.trim());
-    
-    if (req.user._id !== studentID && req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Unauthorized' });
+    const userID = new ObjectId(req.user._id);
+
+    if (userID.toString() !== studentID.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    try {
-        const db = await connectToDb();
-        const applicationsCollection = db.collection("Applications");
+    const db = await connectToDb();
+    const applicationsCollection = db.collection("Applications");
 
-        const counts = await applicationsCollection.aggregate([
-            { $match: { studentID } },
-            { $group: { _id: "$feedback", count: { $sum: 1 } } }
-        ]).toArray();
+    const counts = await applicationsCollection.aggregate([
+      { $match: { studentID } },
+      { $group: { _id: "$feedback", count: { $sum: 1 } } }
+    ]).toArray();
 
-        const response = {
-            pending: 0,
-            approved: 0,
-            rejected: 0,
-            profileCompletion: 0, // You'll need to implement this
-            alerts: [] // You'll need to implement this
-        };
+    const response = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      profileCompletion: 0,
+      alerts: []
+    };
 
-        counts.forEach(item => {
-            const key = item._id.toLowerCase();
-            if (response.hasOwnProperty(key)) {
-                response[key] = item.count;
-            }
-        });
+    counts.forEach(item => {
+      const key = item._id?.toLowerCase();
+      if (response.hasOwnProperty(key)) {
+        response[key] = item.count;
+      }
+    });
 
-        res.status(200).json(response);
-    } catch (error) {
-        console.error("Error getting application counts:", error);
-        res.status(500).json({ message: "Server error. Please try no please later." });
-    }
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error getting application counts:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
 });
+
 
 app.get('/api/employers/:employerID/application-status-counts', authMiddleware, async (req, res) => {
   const ObjectId = require('mongodb').ObjectId;
@@ -1210,7 +1215,7 @@ app.post('/api/create/internships', authMiddleware, async (req, res) => {
   try {
     const db = await connectToDb();
     console.log('req.user:', req.user);
-    const userId = new ObjectId(req.user._id);// from token
+    const userId = new ObjectId(req.user._id);
     const employer = await db.collection('Employer').findOne({ userID: userId });
     console.log('userId as ObjectId:', userId);
 console.log('Looking for Employer with userID:', userId.toHexString());
@@ -1222,7 +1227,7 @@ console.log('Looking for Employer with userID:', userId.toHexString());
 
     const newInternship = {
       title: req.body.title,
-      company: employer.OrgName,
+      company: employer.company,
       location: req.body.location,
       duration: req.body.duration,
       stipend: req.body.stipend,
@@ -1257,7 +1262,7 @@ app.put('/api/internships/:id', authMiddleware, async (req, res) => {
         duration: req.body.duration,
         stipend: req.body.stipend,
         description: req.body.description,
-        requirements: req.body.requirements // array
+        requirements: req.body.requirements 
       }
     };
 
@@ -1409,10 +1414,46 @@ app.put('/api/applications/:id/feedback', async (req, res) => {
   res.status(200).json({ message: 'Feedback updated' });
 });
 
+console.log("Loaded GROQ_API_KEY:", process.env.GROQ_API_KEY);
 
+app.post('/api/ai-enhance-cv', async (req, res) => {
+  const { cvText, jobDescription } = req.body;
+  console.log('Loaded GROQ_API_KEY:', process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY : '❌ Missing');
 
+  if (!cvText) {
+    return res.status(400).json({ error: 'cvText is required' });
+  }
 
+  const prompt = jobDescription
+    ? `Revamp the following student CV to match the job description below:\n\nCV:\n${cvText}\n\nJob Description:\n${jobDescription}\n\nOutput a tailored, professional version of the CV.`
+    : `Improve and polish the following student CV:\n\n${cvText}\n\nMake it more professional and impactful.`;
 
+  try {
+    const response = await axios.post(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          { role: 'system', content: 'You are a professional resume writer for African university students.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const result = response.data.choices[0].message.content;
+    res.json({ enhancedCV: result });
+  } catch (error) {
+    console.error('Groq AI error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'AI enhancement failed' });
+  }
+});
 
 
 
