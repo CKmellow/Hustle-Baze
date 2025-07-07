@@ -7,7 +7,7 @@ import ManageUsers from './ManageUsers.jsx';
 import Lottie from 'lottie-react';
 import pointerAnimation from '../animations/Alert.json';
 import Topbar from '../studview/Topbar';
-import { Home, Users, BarChart2, LogOut, UserCircle } from 'lucide-react';
+import { Home, Users, BarChart2, LogOut, UserCircle, AlertTriangle } from 'lucide-react';
 import './UniLayout.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -87,6 +87,9 @@ useEffect(() => {
               <li className={activePage === "dashboard" ? "active" : ""}>
                 <a onClick={() => setActivePage("dashboard")}><Home size={18} /> Dashboard</a>
               </li>
+              <li className={activePage === "profile" ? "active" : ""}>
+                <a onClick={() => setActivePage("profile")}><UserCircle size={18} /> User Profile</a>
+              </li>
               <li className={activePage === "users" ? "active" : ""}>
                 <a onClick={() => setActivePage("users")}><UserCircle size={18} /> Manage users</a>
               </li>
@@ -144,7 +147,7 @@ useEffect(() => {
                   <p className="card-subtext">Live on Portal</p>
                 </div>
                 <div
-                  className="career-card card-rejected"
+                  className="career-card card-reviewed"
                   onClick={() => setActivePage("analytics")}
                   style={{ cursor: "pointer" }}
                 >
@@ -155,33 +158,33 @@ useEffect(() => {
               </div>
 
               <div className="career-alerts-row">
-                <div className="career-alerts-animation">
+                {/* <div className="career-alerts-animation">
                   <Lottie
                     animationData={pointerAnimation}
                     loop
                     style={{ width: '100px', height: '100px' }}
                   />
-                </div>
-                <div className="career-alerts-card">
+                </div> */}
+                <div className={`career-alerts-card ${alerts.length > 0 ? 'pending-alerts' : 'no-alerts'}`}>
                   <div className="career-alerts-header">
                     <h3>Alerts</h3>
                     <span className="badge">2</span>
-                  </div>
- <ul className="career-alerts-list">
-  {alerts.length > 0 ? (
-    alerts.map((alert, index) => (
-      <li key={index} className="alert-item fade-in">
-        <div className="alert-icon">⚠</div>
-        <div className="alert-content">
-          <span className="alert-title">New Organization</span>
-          <p className="alert-message">{alert.message}</p>
-        </div>
-      </li>
-    ))
-  ) : (
-    <li className="no-alerts">🎉 No new alerts at the moment!</li>
-  )}
-</ul>
+                                      </div>
+                    <ul className="career-alerts-list">
+                      {alerts.length > 0 ? (
+                        alerts.map((alert, index) => (
+                          <li key={index} className="alert-item fade-in">
+                            <div className="alert-icon"><AlertTriangle size={20} color="#eab308" /></div>
+                            <div className="alert-content">
+                              <span className="alert-title">New Organization</span>
+                              <p className="alert-message">{alert.message}</p>
+                            </div>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="no-alerts">🎉 No new alerts at the moment!</li>
+                      )}
+                    </ul>
 
 
                 </div>

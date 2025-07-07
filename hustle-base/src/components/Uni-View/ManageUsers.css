@@ -111,3 +111,80 @@
   background-color: #f9f9f9;
   color: #333;
 }
+
+
+.career-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-top: 4px solid transparent;
+}
+
+.career-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Color-coded Cards */
+.card-pending {
+  border-top-color: #3b82f6; /* Blue */
+}
+
+.card-rejected {
+  border-top-color: #ef4444; /* Red */
+}
+
+.card-accepted {
+  border-top-color: #10b981; /* Green */
+}
+.card-reviewed {
+  border-top-color: #f59e0b; /* Green */
+}
+
+.card-stat {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.card-pending .card-stat {
+  color: #3b82f6;
+}
+
+.card-rejected .card-stat {
+  color: #ef4444;
+}
+
+.card-accepted .card-stat {
+  color: #10b981;
+}
+
+.card-subtext {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .career-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .career-alerts-row {
+    flex-direction: column;
+  }
+}
