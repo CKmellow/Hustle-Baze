@@ -14,7 +14,7 @@ const ManageUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/users')
+    fetch('https://hustle-baze-backend.onrender.com/api/users')
       .then(res => res.json())
       .then(response => {
         if (response.success) {
@@ -46,7 +46,7 @@ const ManageUsers = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/users/${selectedUser._id}', {
+      const res = await fetch('https://hustle-baze-backend.onrender.com/api/users/${selectedUser._id}', {
         method: 'DELETE',
       });
       const data = await res.json();

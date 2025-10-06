@@ -22,7 +22,7 @@ const Applications = ({ setActivePage }) => {
     const fetchApplications = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/fetch/applications', {
+        const response = await axios.get('https://hustle-baze-backend.onrender.com/api/fetch/applications', {
           params: filters,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -43,7 +43,7 @@ const Applications = ({ setActivePage }) => {
     if (!window.confirm('Are you sure you want to delete this application?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/applications/${id}`, {
+      await axios.delete(`https://hustle-baze-backend.onrender.com/api/applications/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -56,7 +56,7 @@ const Applications = ({ setActivePage }) => {
 
   const downloadDocument = (fileUrl) => {
     if (!fileUrl) return;
-    window.open(`http://localhost:5000/${fileUrl}`, '_blank'); 
+    window.open(`https://hustle-baze-backend.onrender.com/${fileUrl}`, '_blank'); 
   };
 
   const getfeedbackBadge = (feedback) => {

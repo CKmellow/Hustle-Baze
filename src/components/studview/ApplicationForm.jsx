@@ -65,7 +65,7 @@ const ApplicationForm = ({ setActivePage }) => {
       setFileUploading(true);
       const data = new FormData();
       data.append(field, file);
-      const response = await axios.post('http://localhost:5000/api/upload', data, {
+      const response = await axios.post('https://hustle-baze-backend.onrender.com/api/upload', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -86,7 +86,7 @@ const ApplicationForm = ({ setActivePage }) => {
     return;
   }
   try {
-    await axios.post('http://localhost:5000/api/create/applications', formData, {
+    await axios.post('https://hustle-baze-backend.onrender.com/api/create/applications', formData, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -125,7 +125,7 @@ const ApplicationForm = ({ setActivePage }) => {
           {formData.coverLetter ? (
             <div className="file-uploaded">
               <span>Uploaded</span>
-              <button type="button" onClick={() => window.open(`http://localhost:5000/${formData.coverLetter}`)}>View</button>
+              <button type="button" onClick={() => window.open(`https://hustle-baze-backend.onrender.com/${formData.coverLetter}`)}>View</button>
               <button type="button" onClick={() => setFormData(prev => ({ ...prev, coverLetter: '' }))}>Change</button>
             </div>
           ) : (
@@ -138,7 +138,7 @@ const ApplicationForm = ({ setActivePage }) => {
           {formData.cv ? (
             <div className="file-uploaded">
               <span>Uploaded</span>
-              <button type="button" onClick={() => window.open(`http://localhost:5000/${formData.cv}`)}>View</button>
+              <button type="button" onClick={() => window.open(`https://hustle-baze-backend.onrender.com/${formData.cv}`)}>View</button>
               <button type="button" onClick={() => setFormData(prev => ({ ...prev, cv: '' }))}>Change</button>
             </div>
           ) : (

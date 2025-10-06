@@ -18,7 +18,7 @@ const AvailableInternships = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-  fetch('http://localhost:5000/api/internships')
+  fetch('https://hustle-baze-backend.onrender.com/api/internships')
     .then(res => res.json())
     .then(data => {
       if (Array.isArray(data)) {

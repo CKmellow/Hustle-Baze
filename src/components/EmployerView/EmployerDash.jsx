@@ -36,10 +36,10 @@ const EmployerDash = ({ setActivePage }) => {
       setError(null);
 
       const [statusRes, profileRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/employers/${employerID}/application-status-counts`, {
+        axios.get(`https://hustle-baze-backend.onrender.com/api/employers/${employerID}/application-status-counts`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        axios.get(`http://localhost:5000/api/employers/${employerID}/completion`, {
+        axios.get(`https://hustle-baze-backend.onrender.com/api/employers/${employerID}/completion`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
       ]);

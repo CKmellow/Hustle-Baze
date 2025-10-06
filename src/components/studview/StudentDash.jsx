@@ -37,7 +37,7 @@ const StudentDash = ({ setActivePage }) => {
       setError(null);
 
       const [countsResponse, completionResponse] = await Promise.all([
-        axios.get(`http://localhost:5000/api/student/${studentID}/application-status-counts`, {
+        axios.get(`https://hustle-baze-backend.onrender.com/api/student/${studentID}/application-status-counts`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }).catch(err => ({ 
           data: { 
@@ -49,7 +49,7 @@ const StudentDash = ({ setActivePage }) => {
         })),
         
         
-        axios.get(`http://localhost:5000/api/students/${studentID}/completion`, {
+        axios.get(`https://hustle-baze-backend.onrender.com/api/students/${studentID}/completion`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }).catch(err => ({ 
           data: { 

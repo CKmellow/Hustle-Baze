@@ -11,7 +11,7 @@ const ManageComments = () => {
 
   const fetchComments = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/comments');
+      const res = await fetch('https://hustle-baze-backend.onrender.com/api/comments');
       const data = await res.json();
       if (data.success) {
         setComments(data.data);
@@ -28,7 +28,7 @@ const ManageComments = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/comments/${id}`, {
+      const res = await fetch(`https://hustle-baze-backend.onrender.com/api/comments/${id}`, {
         method: 'DELETE'
       });
 

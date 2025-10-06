@@ -10,7 +10,7 @@ const VerifyOrganizations = () => {
   const [filter, setFilter] = useState('all');
 
  useEffect(() => {
-  fetch('http://localhost:5000/api/employers')
+  fetch('https://hustle-baze-backend.onrender.com/api/employers')
     .then(res => res.json())
     .then(data => {
       console.log("Employers:", data); // 👀 See if `status` appears
@@ -24,7 +24,7 @@ const VerifyOrganizations = () => {
     if (!confirmVerify) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/employers/${id}/verify`, {
+      const response = await fetch(`https://hustle-baze-backend.onrender.com/api/employers/${id}/verify`, {
         method: 'PATCH',
       });
 
@@ -48,7 +48,7 @@ const VerifyOrganizations = () => {
     if (!confirmReport) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/employers/${id}/report`, {
+      const response = await fetch(`https://hustle-baze-backend.onrender.com/api/employers/${id}/report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

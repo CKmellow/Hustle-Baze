@@ -13,7 +13,7 @@ const EmployerApplicationsPage = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/internships/${internshipId}/applications`, {
+        const res = await axios.get(`https://hustle-baze-backend.onrender.com/api/internships/${internshipId}/applications`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setApplications(res.data.applications);
@@ -30,7 +30,7 @@ const EmployerApplicationsPage = () => {
   const handleFeedbackChange = async (applicationId, feedback, description) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/applications/${applicationId}/feedback`,
+        `https://hustle-baze-backend.onrender.com/api/applications/${applicationId}/feedback`,
         { feedback, description },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -40,7 +40,7 @@ const EmployerApplicationsPage = () => {
   };
 
   const handleDownloadAll = () => {
-    window.open(`http://localhost:5000/api/internships/${internshipId}/download-all`, "_blank");
+    window.open(`https://hustle-baze-backend.onrender.com/api/internships/${internshipId}/download-all`, "_blank");
   };
 
   return (
@@ -96,7 +96,7 @@ const EmployerApplicationsPage = () => {
                 <button
                   className="icon-button"
                   title="View CV"
-                  onClick={() => window.open(`http://localhost:5000/${app.cv}`, "_blank")}
+                  onClick={() => window.open(`https://hustle-baze-backend.onrender.com/${app.cv}`, "_blank")}
                 >
                   <FileText size={18} />
                 </button>
@@ -105,7 +105,7 @@ const EmployerApplicationsPage = () => {
                 <button
                   className="icon-button"
                   title="View Cover Letter"
-                  onClick={() => window.open(`http://localhost:5000/${app.coverLetter}`, "_blank")}
+                  onClick={() => window.open(`https://hustle-baze-backend.onrender.com/${app.coverLetter}`, "_blank")}
                 >
                   <FileText size={18} />
                 </button>

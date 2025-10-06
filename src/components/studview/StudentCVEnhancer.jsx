@@ -11,7 +11,7 @@ export default function StudentCVEnhancer() {
   const handleEnhance = async () => {
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/ai-enhance-cv', {
+      const res = await axios.post('https://hustle-baze-backend.onrender.com/api/ai-enhance-cv', {
         cvText,
         jobDescription
       });

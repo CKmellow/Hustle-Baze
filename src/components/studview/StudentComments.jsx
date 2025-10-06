@@ -31,7 +31,7 @@ const StudentComments = () => {
 
   const fetchComments = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/comments/${student._id}`, {
+      const res = await fetch(`https://hustle-baze-backend.onrender.com/api/comments/${student._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -46,7 +46,7 @@ const StudentComments = () => {
 
   const checkApplicationStatus = async () => {
   try {
-    const res = await fetch(`http://localhost:5000/api/applications/check/${student._id}`, {
+    const res = await fetch(`https://hustle-baze-backend.onrender.com/api/applications/check/${student._id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -72,7 +72,7 @@ const StudentComments = () => {
 
   const handleSave = async () => {
     try {
-      await fetch(`http://localhost:5000/api/comments/${editingId}`, {
+      await fetch(`https://hustle-baze-backend.onrender.com/api/comments/${editingId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ const StudentComments = () => {
     if (!confirm) return;
 
     try {
-      await fetch(`http://localhost:5000/api/comments/${id}`, {
+      await fetch(`https://hustle-baze-backend.onrender.com/api/comments/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -106,7 +106,7 @@ const StudentComments = () => {
 
   const handleNewComment = async () => {
     try {
-      await fetch(`http://localhost:5000/api/comments`, {
+      await fetch(`https://hustle-baze-backend.onrender.com/api/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

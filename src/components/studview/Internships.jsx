@@ -19,7 +19,7 @@ const Internships = ({setActivePage}) => {
     const fetchInternships = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/filter/internships', {
+        const response = await axios.get('https://hustle-baze-backend.onrender.com/api/filter/internships', {
           params: filters,
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`

@@ -27,7 +27,7 @@ const CareerOfficerProfile = () => {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`http://localhost:5000/api/career-officers/${formData._id}`, {
+      const response = await fetch(`https://hustle-baze-backend.onrender.com/api/career-officers/${formData._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ const CareerOfficerProfile = () => {
 
     const token = localStorage.getItem("token");
 
-    fetch(`http://localhost:5000/api/career-officers/by-user/${userId}`, {
+    fetch(`https://hustle-baze-backend.onrender.com/api/career-officers/by-user/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

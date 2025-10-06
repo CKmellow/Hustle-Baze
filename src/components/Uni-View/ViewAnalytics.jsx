@@ -21,7 +21,7 @@ const ViewAnalytics = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:5000/api/applications/analytics?range=${timeRange}`)
+    fetch(`https://hustle-baze-backend.onrender.com/api/applications/analytics?range=${timeRange}`)
       .then(res => res.json())
       .then(data => {
         const formatted = Object.entries(data).map(([status, count]) => ({
@@ -34,7 +34,7 @@ const ViewAnalytics = () => {
   }, [timeRange]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/analytics/user-roles', {
+    fetch('https://hustle-baze-backend.onrender.com/api/analytics/user-roles', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }

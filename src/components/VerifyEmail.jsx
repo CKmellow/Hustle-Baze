@@ -9,7 +9,7 @@ const VerifyEmail = () => {
   useEffect(() => {
     const token = searchParams.get('token');
 
-    fetch(`http://localhost:5000/verify-email?token=${token}`)
+    fetch(`https://hustle-baze-backend.onrender.com/verify-email?token=${token}`)
       .then(res => res.text())
       .then(data => {
         setStatus(data);

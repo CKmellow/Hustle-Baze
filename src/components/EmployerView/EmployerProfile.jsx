@@ -25,7 +25,7 @@ const EmployerProfile = () => {
       return;
     }
 
-    fetch(`http://localhost:5000/api/employers/by-user/${id}`, {
+    fetch(`https://hustle-baze-backend.onrender.com/api/employers/by-user/${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -57,7 +57,7 @@ const EmployerProfile = () => {
     delete payload.email;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/employers/${employerId}`, {
+      const res = await fetch(`https://hustle-baze-backend.onrender.com/api/employers/${employerId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

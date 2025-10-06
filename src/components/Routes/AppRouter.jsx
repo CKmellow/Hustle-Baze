@@ -37,7 +37,7 @@ const RoleRedirector = () => {
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/verify-token", {
+        const res = await fetch("https://hustle-baze-backend.onrender.com/api/verify-token", {
           headers: {
             Authorization: `Bearer ${token}`
           }

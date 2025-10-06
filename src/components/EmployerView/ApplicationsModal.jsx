@@ -9,7 +9,7 @@ const ApplicationsModal = ({ internshipId, onClose }) => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/internships/${internshipId}/applications`, {
+        const res = await axios.get(`https://hustle-baze-backend.onrender.com/api/internships/${internshipId}/applications`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setApplications(res.data.applications);
@@ -25,7 +25,7 @@ const ApplicationsModal = ({ internshipId, onClose }) => {
 
   const handleFeedbackChange = async (applicationId, feedback, description) => {
     try {
-      await axios.put(`http://localhost:5000/api/applications/${applicationId}/feedback`, { feedback, description }, {
+      await axios.put(`https://hustle-baze-backend.onrender.com/api/applications/${applicationId}/feedback`, { feedback, description }, {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (err) {

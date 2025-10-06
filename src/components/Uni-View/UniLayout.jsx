@@ -28,7 +28,7 @@ const UniLayout = () => {
 
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/dashboard-stats')
+        const response = await fetch('https://hustle-baze-backend.onrender.com/api/dashboard-stats')
 ;
         const data = await response.json();
         setCardStats(data);
@@ -44,7 +44,7 @@ const [alerts, setAlerts] = useState([]);
 useEffect(() => {
   const fetchAlerts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/alerts');
+      const response = await fetch('https://hustle-baze-backend.onrender.com/api/alerts');
       const data = await response.json();
       setAlerts(data);
     } catch (err) {

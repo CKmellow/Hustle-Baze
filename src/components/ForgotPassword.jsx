@@ -7,7 +7,7 @@ const ForgotPassword = () => {
 
   const handleReset = async (e) => {
     e.preventDefault();
-    const response = await fetch('http://localhost:5000/api/forgot-password', {
+    const response = await fetch('https://hustle-baze-backend.onrender.com/api/forgot-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })

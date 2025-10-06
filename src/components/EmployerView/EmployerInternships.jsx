@@ -39,7 +39,7 @@ const EmployerInternships = () => {
 
   const fetchInternships = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/employers/${user._id}/internships`, {
+      const res = await axios.get(`https://hustle-baze-backend.onrender.com/api/employers/${user._id}/internships`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setInternships(res.data.internships || []);
@@ -96,11 +96,11 @@ const EmployerInternships = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:5000/api/internships/${selectedInternship._id}`, payload, {
+        await axios.put(`https://hustle-baze-backend.onrender.com/api/internships/${selectedInternship._id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('http://localhost:5000/api/create/internships', payload, {
+        await axios.post('https://hustle-baze-backend.onrender.com/api/create/internships', payload, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -117,7 +117,7 @@ const EmployerInternships = () => {
   const handleDelete = async () => {
     if (!selectedInternship) return;
     try {
-      await axios.delete(`http://localhost:5000/api/internships/${selectedInternship._id}`, {
+      await axios.delete(`https://hustle-baze-backend.onrender.com/api/internships/${selectedInternship._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchInternships();

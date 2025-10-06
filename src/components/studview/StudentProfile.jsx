@@ -26,7 +26,7 @@ const [errorMsg, setErrorMsg] = useState('');
       return;
     }
 
-    fetch(`http://localhost:5000/api/students/by-user/${id}`, {
+    fetch(`https://hustle-baze-backend.onrender.com/api/students/by-user/${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -75,7 +75,7 @@ const [errorMsg, setErrorMsg] = useState('');
     delete payload.email; // Not editable
 
     try {
-      const response = await fetch(`http://localhost:5000/api/students/${studentId}`, {
+      const response = await fetch(`https://hustle-baze-backend.onrender.com/api/students/${studentId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
